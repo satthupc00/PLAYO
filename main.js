@@ -1,5 +1,5 @@
 // M PlayO - main process. Giữ file này nhẹ để app mở nhanh: thư viện nặng chỉ require khi cần.
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu, screen } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { pathToFileURL } = require('url');
@@ -258,6 +258,23 @@ ipcMain.handle('toggle-fullscreen', e => {
 });
 ipcMain.handle('exit-fullscreen', e => { BrowserWindow.fromWebContents(e.sender).setFullScreen(false); });
 ipcMain.on('set-title', (e, t) => { const w = BrowserWindow.fromWebContents(e.sender); if (w) w.setTitle(t); });
+// Co cửa sổ vừa khít video: sw/sh = kích thước video đang hiển thị, cw/ch = phần giao diện ngoài vùng video
+ipcMain.handle('fit-window', (e, { sw, sh, cw, ch }) => {
+  const win = BrowserWindow.fromWebContents(e.sender);
+  if (!win || win.isFullScreen()) return false;
+  if (win.isMaximized()) win.unmaximize();
+  const [ow, oh] = win.getSize(), [iw, ih] = win.getContentSize();
+  const fw = ow - iw, fh = oh - ih;                       // viền cửa sổ
+  const wa = screen.getDisplayMatching(win.getBounds()).workArea;
+  const k = Math.min(1, (wa.width - fw - cw) / sw, (wa.height - fh - ch) / sh);
+  const [minW, minH] = win.getMinimumSize();
+  const W = Math.max(minW, Math.round(sw * k + cw + fw)), H = Math.max(minH, Math.round(sh * k + ch + fh));
+  const b = win.getBounds(), cx = b.x + b.width / 2, cy = b.y + b.height / 2;
+  const x = Math.round(Math.min(Math.max(cx - W / 2, wa.x), wa.x + wa.width - W));
+  const y = Math.round(Math.min(Math.max(cy - H / 2, wa.y), wa.y + wa.height - H));
+  win.setBounds({ x, y, width: W, height: H }, true);
+  return true;
+});
 ipcMain.handle('clear-cache', () => cleanCache(true));
 
 /* ---------- auto update (GitHub Releases) ---------- */

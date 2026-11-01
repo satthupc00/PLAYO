@@ -20,6 +20,7 @@ contextBridge.exposeInMainWorld('api', {
   whatsNew: () => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'whatsnew.json'), 'utf8')); } catch { return null; } },
   assocStatus: () => ipcRenderer.invoke('assoc-status'),
   setDefaultApp: () => ipcRenderer.invoke('assoc-set-default'),
+  fitWindow: v => ipcRenderer.invoke('fit-window', v),
   pathForFile: f => webUtils.getPathForFile(f),
   on: (ch, cb) => ipcRenderer.on(ch, (_e, v) => cb(v))
 });
