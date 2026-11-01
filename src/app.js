@@ -415,14 +415,7 @@ stage.addEventListener('pointerup', e => {
 });
 stage.addEventListener('pointercancel', endPan);
 stage.addEventListener('dblclick', e => { if (S.ready && !e.target.closest('.busy')) toggleFullscreen(); });
-// vào / thoát toàn màn hình: đưa video về 100% và căn giữa (chờ cửa sổ đổi kích thước xong)
-let recenterUntil = 0;
-function recenter100() { if (S.ready) { zoomTo(1); showZoomBadge(); } }
-new ResizeObserver(() => {
-  if (!S.ready) return;
-  if (Date.now() < recenterUntil) recenter100(); else if (S.z.fit) layout();
-  updateTicks();
-}).observe(stage);
+new ResizeObserver(() => { if (S.ready) { if (S.z.fit) layout(); updateTicks(); } }).observe(stage);
 new ResizeObserver(() => { if (S.ready) updateTicks(); }).observe(tl);
 
 /* ================= Các nút ================= */
@@ -448,7 +441,7 @@ setLoop(store.get('loop', true)); setMute(store.get('muted', false));
 async function toggleFullscreen() { await api.toggleFullscreen(); }
 api.on('fullscreen', v => {
   document.body.classList.toggle('fs', v); bumpIdle();
-  recenterUntil = Date.now() + 1200; recenter100();
+  if (S.ready) fit();   // vào / thoát toàn màn hình: video zoom vừa khung, căn giữa
 });
 let idleTimer = 0;
 function bumpIdle() {
