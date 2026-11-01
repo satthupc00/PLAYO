@@ -44,7 +44,7 @@ svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-l
 .tl .head{position:absolute;left:38%;top:2px;width:2px;height:26px;background:#fff;transform:translateX(-1px)}
 .tl .head::before{content:"";position:absolute;top:-2px;left:-6px;width:14px;height:10px;background:var(--red);border-radius:3px 3px 7px 7px}
 .tl .tip{position:absolute;left:38%;top:-26px;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:5px;padding:1px 7px;font-size:11px;font-variant-numeric:tabular-nums;white-space:nowrap}
-.row{display:flex;align-items:center;gap:6px;margin-top:4px}
+.row{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;margin-top:4px}.grp{display:flex;align-items:center;gap:6px}.grp.r{justify-content:flex-end}.grp.l .tc{margin-left:0}
 .tc{font-variant-numeric:tabular-nums;font-weight:600;margin:0 10px;white-space:nowrap}
 .tc span{color:var(--muted);font-weight:400}
 .sp{flex:1}
@@ -73,11 +73,10 @@ kbd{font:600 11px "Segoe UI";background:var(--panel);border:1px solid var(--line
 <h2>1 · Khi đang xem video</h2>
 <div class="win">
  <header class="top">
-  <div class="brand"><img src="icon/concept-a.svg" alt=""><div class="brand-name"><span><span class="m">M</span> <span class="a">PlayO</span></span><span class="latest">latest</span></div></div>
+  <div class="brand"><img src="../build/icon.png" alt=""><div class="brand-name"><span><span class="m">M</span> <span class="a">PlayO</span></span><span class="latest">latest</span></div></div>
   <div class="file"><b>walk_cycle_v03_final.mov</b><span class="tag">1920×1080</span><span class="tag">24 fps</span><span class="tag">ProRes</span><span class="tag">00:12.500</span></div>
   <div class="tools">
-   <button class="primary" title="Mở video (Ctrl+O)"><svg viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>Mở video</button>
-   <button class="ibtn ghost" title="Cài đặt"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+      <button class="ibtn ghost" title="Cài đặt"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
    <button class="ibtn ghost upd" title="Kiểm tra cập nhật · Đã là bản mới nhất"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/></svg></button>
   </div>
   <div class="winbtns"><i>—</i><i>☐</i><i>✕</i></div>
@@ -86,18 +85,13 @@ kbd{font:600 11px "Segoe UI";background:var(--panel);border:1px solid var(--line
  <div class="ctrl">
   <div class="tl"><div class="track"></div><div class="ticks"></div><div class="fill"></div><div class="head"></div><div class="tip">00:04.750 · F120</div></div>
   <div class="row">
-   <button class="ibtn ghost" title="Về đầu (Home)"><svg viewBox="0 0 24 24"><path d="M5 5v14M19 5 9 12l10 7z"/></svg></button>
-   <button class="ibtn ghost" title="Lùi 1 frame (←)"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button>
-   <button class="ibtn primary" style="width:36px;height:32px" title="Phát / dừng (Space)"><svg viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M7 5v14l12-7z"/></svg></button>
-   <button class="ibtn ghost" title="Tiến 1 frame (→)"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button>
-   <button class="ibtn ghost" title="Về cuối (End)"><svg viewBox="0 0 24 24"><path d="M19 5v14M5 5l10 7-10 7z"/></svg></button>
-   <div class="tc">00:04.750 <span>/ 00:12.500</span> &nbsp; F120 <span>/ 300</span></div>
-   <div class="sp"></div>
-   <button class="chip" title="Tốc độ (J / L)">1×</button>
+   <div class="grp l"><div class="tc">00:04.750 <span>/ 00:12.500</span> &nbsp; F120 <span>/ 300</span></div></div>
+   <div class="grp c"><button class="ibtn ghost" title="Về đầu (Home)"><svg viewBox="0 0 24 24"><path d="M5 5v14M19 5 9 12l10 7z"/></svg></button><button class="ibtn ghost" title="Lùi 1 frame (←)"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><button class="ibtn primary" style="width:36px;height:32px" title="Phát / dừng (Space)"><svg viewBox="0 0 24 24" style="fill:#fff;stroke:none"><path d="M7 5v14l12-7z"/></svg></button><button class="ibtn ghost" title="Tiến 1 frame (→)"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><button class="ibtn ghost" title="Về cuối (End)"><svg viewBox="0 0 24 24"><path d="M19 5v14M5 5l10 7-10 7z"/></svg></button></div>
+   <div class="grp r"><button class="chip" title="Tốc độ (J / L)">1×</button>
    <button class="chip on" title="Lặp lại (R)">Lặp</button>
    <button class="ibtn ghost" title="Tắt tiếng (M)"><svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7"/></svg></button>
    <div class="vol"></div>
-   <button class="ibtn ghost" title="Toàn màn hình (F)"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+   <button class="ibtn ghost" title="Toàn màn hình (F)"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button></div>
   </div>
  </div>
  <div class="status"><span>←/→ từng frame · Shift+←/→ 10 frame · Space phát/dừng</span><span class="credit">Created by Mondiro</span></div>
@@ -106,29 +100,20 @@ kbd{font:600 11px "Segoe UI";background:var(--panel);border:1px solid var(--line
 <h2>2 · Khi mới mở app (chưa có video) — đang kéo file vào</h2>
 <div class="win" style="height:420px">
  <header class="top">
-  <div class="brand"><img src="icon/concept-a.svg" alt=""><div class="brand-name"><span><span class="m">M</span> <span class="a">PlayO</span></span><span class="latest">latest</span></div></div>
+  <div class="brand"><img src="../build/icon.png" alt=""><div class="brand-name"><span><span class="m">M</span> <span class="a">PlayO</span></span><span class="latest">latest</span></div></div>
   <div class="file"></div>
-  <div class="tools"><button class="primary">Mở video</button><button class="ibtn ghost upd"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/></svg></button></div>
+  <div class="tools"><button class="ibtn ghost upd"><svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 0 1-15 6.7L3 16M3 12a9 9 0 0 1 15-6.7L21 8M21 3v5h-5M3 21v-5h5"/></svg></button></div>
   <div class="winbtns"><i>—</i><i>☐</i><i>✕</i></div>
  </header>
- <div class="stage"><div class="empty"><div class="drop"><h3>Thả để mở</h3>MP4 · MOV · AVI · MKV · WebM — hoặc bấm <kbd>Ctrl</kbd>+<kbd>O</kbd>
+ <div class="stage"><div class="empty"><div class="drop"><h3>Thả để mở</h3>Kéo video vào cửa sổ, hoặc double-click file video trong Windows<br>MP4 · MOV · AVI · MKV · WebM
   <div class="keys"><span><kbd>Space</kbd></span><span>Phát / dừng</span><span><kbd>←</kbd> <kbd>→</kbd></span><span>Lùi / tiến 1 frame</span><span><kbd>Shift</kbd>+<kbd>←</kbd><kbd>→</kbd></span><span>Lùi / tiến 10 frame</span><span><kbd>J</kbd> <kbd>K</kbd> <kbd>L</kbd></span><span>Chậm / dừng / nhanh</span></div></div></div></div>
  <div class="status"><span></span><span class="credit">Created by Mondiro</span></div>
 </div>
 
-<h2>3 · Icon — 3 hướng (chọn 1)</h2>
-<div class="icons">
- <div class="card"><h4>A · Cuộn phim + Play  (đề xuất)</h4><p>Khối phim xanh dương nổi, lỗ phim 2 mép, nút play đỏ Mondiro. Nhìn là biết app xem video.</p>
-  <div class="big"><img src="icon/concept-a.svg" width="128"><img src="icon/concept-a.svg" width="48"><img src="icon/concept-a.svg" width="32"><img src="icon/concept-a.svg" width="16"></div>
-  <div class="tb dark"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-a.svg" width="24"><img src="icon/concept-a.svg" width="32"></div>
-  <div class="tb light"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-a.svg" width="24"><img src="icon/concept-a.svg" width="32"></div></div>
- <div class="card"><h4>B · Chồng frame</h4><p>3 khung xếp lớp (tím–ngọc–xanh) = xem từng frame; play đỏ ở khung trước.</p>
-  <div class="big"><img src="icon/concept-b.svg" width="128"><img src="icon/concept-b.svg" width="48"><img src="icon/concept-b.svg" width="32"><img src="icon/concept-b.svg" width="16"></div>
-  <div class="tb dark"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-b.svg" width="24"><img src="icon/concept-b.svg" width="32"></div>
-  <div class="tb light"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-b.svg" width="24"><img src="icon/concept-b.svg" width="32"></div></div>
- <div class="card"><h4>C · Chữ O + Play</h4><p>Vòng chữ "O" của PlayO, khối vàng nổi, play đỏ bên trong. Gắn với tên app.</p>
-  <div class="big"><img src="icon/concept-c.svg" width="128"><img src="icon/concept-c.svg" width="48"><img src="icon/concept-c.svg" width="32"><img src="icon/concept-c.svg" width="16"></div>
-  <div class="tb dark"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-c.svg" width="24"><img src="icon/concept-c.svg" width="32"></div>
-  <div class="tb light"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="icon/concept-c.svg" width="24"><img src="icon/concept-c.svg" width="32"></div></div>
-</div>
+<h2>3 · Icon (logo của bạn, đã bỏ chữ PLAYO, căn giữa)</h2>
+<div class="icons"><div class="card" style="width:auto">
+<div class="big"><img src="../build/icon.png" width="160"><img src="../build/icon.png" width="64"><img src="../build/icon.png" width="48"><img src="../build/icon.png" width="32"><img src="../build/icon.png" width="16"></div>
+<div class="tb dark"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="../build/icon.png" width="24"><span style="width:12px"></span><span class="fake" style="width:32px;height:32px;background:#4285F4"></span><img src="../build/icon.png" width="32"></div>
+<div class="tb light" style="margin-top:6px"><span class="fake" style="width:24px;height:24px;background:#4285F4"></span><span style="width:24px;height:24px;background:#F8D775;border-radius:3px"></span><img src="../build/icon.png" width="24"><span style="width:12px"></span><span class="fake" style="width:32px;height:32px;background:#4285F4"></span><img src="../build/icon.png" width="32"></div>
+<p style="margin-top:8px">Thanh taskbar Windows: nền tối / sáng, cỡ 24px và 32px</p></div></div>
 </body></html>
