@@ -96,6 +96,7 @@ function start() {
     if (!a.files.length) createWindow(null);
     else a.files.forEach((f, i) => createWindow(f, i * 30));
     setTimeout(cleanCache, 8000);
+    setTimeout(autoRegisterAssoc, 4000);
   });
   app.on('window-all-closed', () => app.quit());
 }
@@ -292,4 +293,83 @@ ipcMain.handle('update-state', () => updState);
 ipcMain.handle('update-download', async () => {
   if (!app.isPackaged) return;
   try { await getUpdater().downloadUpdate(); } catch (err) { broadcast({ state: 'error', message: String(err.message || err) }); }
+});
+
+/* ---------- App mặc định (Windows) ---------- */
+const ASSOC_EXT = ['.mp4', '.m4v', '.mov', '.avi', '.mkv', '.webm', '.wmv', '.mpg', '.mpeg', '.mts', '.m2ts'];
+const PROGID = 'MPlayO.Video', APPNAME = 'M PlayO';
+const isWin = process.platform === 'win32';
+const regEsc = s => String(s).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+function regRun(args) {
+  const { execFile } = require('child_process');
+  return new Promise(res => execFile('reg', args, { windowsHide: true }, (err, out) => res(err ? '' : String(out))));
+}
+async function regValue(key, name) {
+  const out = await regRun(name ? ['query', key, '/v', name] : ['query', key, '/ve']);
+  const m = out.match(/REG_\w+\s+(.*)/);
+  const v = m ? m[1].trim() : '';
+  return v && !v.startsWith('(') ? v : null;
+}
+// Đuôi file đang mở bằng app nào
+async function assocStatus() {
+  if (!isWin) return { supported: false, list: [] };
+  const list = await Promise.all(ASSOC_EXT.map(async ext => {
+    const base = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\' + ext;
+    const uc = (await regValue(base + '\\UserChoiceLatest\\ProgId', 'ProgId')) || (await regValue(base + '\\UserChoiceLatest', 'ProgId')) ||
+      (await regValue(base + '\\UserChoice', 'ProgId'));
+    const cls = uc ? null : await regValue('HKCU\\Software\\Classes\\' + ext);
+    const prog = uc || cls || '';
+    const mine = prog === PROGID || /M PlayO\.exe/i.test(prog);
+    return { ext, mine, locked: !!uc };
+  }));
+  const win11 = parseInt(require('os').release().split('.')[2] || '0', 10) >= 22000;
+  return { supported: true, list, win11, all: list.every(x => x.mine) };
+}
+// Ghi đăng ký vào HKCU (không cần quyền admin). setFor = các đuôi chưa có lựa chọn của người dùng -> đặt mặc định luôn
+async function registerAssoc(setFor) {
+  const exe = process.execPath;
+  const cmd = `"${exe}" "%1"`;
+  const L = ['Windows Registry Editor Version 5.00', ''];
+  const key = (k, vals) => { L.push(`[HKEY_CURRENT_USER\\${k}]`); for (const [n, v] of vals) L.push(`${n === '@' ? '@' : `"${n}"`}=${v}`); L.push(''); };
+  const str = v => `"${regEsc(v)}"`;
+  key(`Software\\Classes\\${PROGID}`, [['@', str('Video (M PlayO)')], ['FriendlyTypeName', str('Video (M PlayO)')]]);
+  key(`Software\\Classes\\${PROGID}\\DefaultIcon`, [['@', str(`"${exe}",0`)]]);
+  key(`Software\\Classes\\${PROGID}\\shell\\open`, [['FriendlyAppName', str(APPNAME)]]);
+  key(`Software\\Classes\\${PROGID}\\shell\\open\\command`, [['@', str(cmd)]]);
+  key(`Software\\Mondiro\\MPlayO\\Capabilities`, [['ApplicationName', str(APPNAME)],
+    ['ApplicationDescription', str('Xem nhanh video, xem từng frame')], ['ApplicationIcon', str(`"${exe}",0`)]]);
+  key(`Software\\Mondiro\\MPlayO\\Capabilities\\FileAssociations`, ASSOC_EXT.map(e => [e, str(PROGID)]));
+  key(`Software\\RegisteredApplications`, [[APPNAME, str('Software\\Mondiro\\MPlayO\\Capabilities')]]);
+  key(`Software\\Classes\\Applications\\${path.basename(exe)}`, [['FriendlyAppName', str(APPNAME)]]);
+  key(`Software\\Classes\\Applications\\${path.basename(exe)}\\shell\\open\\command`, [['@', str(cmd)]]);
+  key(`Software\\Classes\\Applications\\${path.basename(exe)}\\SupportedTypes`, ASSOC_EXT.map(e => [e, '""']));
+  for (const e of ASSOC_EXT) {
+    key(`Software\\Classes\\${e}\\OpenWithProgids`, [[PROGID, 'hex(0):']]);
+    if (setFor.includes(e)) key(`Software\\Classes\\${e}`, [['@', str(PROGID)]]);
+  }
+  const file = path.join(app.getPath('temp'), 'mplayo-assoc.reg');
+  fs.writeFileSync(file, Buffer.from('﻿' + L.join('\r\n'), 'utf16le'));
+  await regRun(['import', file]);
+  try { fs.unlinkSync(file); } catch {}
+}
+async function autoRegisterAssoc() {
+  if (!isWin || !app.isPackaged) return;
+  const mark = app.getVersion() + '|' + process.execPath;
+  if (settings.assocMark === mark) return;
+  try {
+    const st = await assocStatus();
+    await registerAssoc(st.list.filter(x => !x.locked).map(x => x.ext));
+    settings.assocMark = mark; saveSettings();
+  } catch {}
+}
+ipcMain.handle('assoc-status', () => assocStatus());
+ipcMain.handle('assoc-set-default', async () => {
+  if (!isWin) return { supported: false };
+  const st = await assocStatus();
+  await registerAssoc(st.list.filter(x => !x.locked).map(x => x.ext));
+  const after = await assocStatus();
+  if (after.all) return { done: true, status: after };
+  await shell.openExternal('ms-settings:defaultapps?registeredAppUser=' + encodeURIComponent(APPNAME));
+  return { opened: true, win11: after.win11, status: after };
 });

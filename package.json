@@ -1,7 +1,7 @@
 {
   "name": "m-playo",
   "productName": "M PlayO",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "M PlayO - xem nhanh video MP4, MOV, AVI, xem từng frame",
   "author": "Mondiro",
   "license": "UNLICENSED",
@@ -24,16 +24,33 @@
     "appId": "com.mondiro.playo",
     "productName": "M PlayO",
     "artifactName": "M-PlayO-Setup-${version}.${ext}",
-    "directories": { "output": "dist", "buildResources": "build" },
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
     "files": [
-      "main.js", "preload.js", "whatsnew.json", "src/**", "build/icon.png",
+      "main.js",
+      "preload.js",
+      "whatsnew.json",
+      "src/**",
+      "build/icon.png",
       "!node_modules/ffprobe-static/bin/darwin/**",
       "!node_modules/ffprobe-static/bin/linux/**",
       "!node_modules/ffprobe-static/bin/win32/ia32/**"
     ],
-    "asarUnpack": ["node_modules/ffmpeg-static/**", "node_modules/ffprobe-static/**"],
+    "asarUnpack": [
+      "node_modules/ffmpeg-static/**",
+      "node_modules/ffprobe-static/**"
+    ],
     "win": {
-      "target": [{ "target": "nsis", "arch": ["x64"] }],
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
       "icon": "build/icon.ico"
     },
     "nsis": {
@@ -44,13 +61,13 @@
       "shortcutName": "M PlayO",
       "include": "build/installer.nsh"
     },
-    "fileAssociations": [
-      { "ext": ["mp4", "m4v"], "name": "MP4 Video", "role": "Viewer" },
-      { "ext": "mov", "name": "QuickTime Video", "role": "Viewer" },
-      { "ext": "avi", "name": "AVI Video", "role": "Viewer" },
-      { "ext": "mkv", "name": "MKV Video", "role": "Viewer" },
-      { "ext": "webm", "name": "WebM Video", "role": "Viewer" }
-    ],
-    "publish": [{ "provider": "github", "owner": "satthupc00", "repo": "PLAYO", "releaseType": "release" }]
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "satthupc00",
+        "repo": "PLAYO",
+        "releaseType": "release"
+      }
+    ]
   }
 }

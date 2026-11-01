@@ -1,15 +1,11 @@
 {
-  "version": "1.0.0",
+  "version": "1.1.0",
   "date": "2026-11-01",
   "new": [
-    "Xem nhanh video MP4, MOV, AVI, MKV, WebM (cả MOV ProRes và AVI)",
-    "Kéo timeline qua lại tự do, có vạch chia từng frame",
-    "Lùi / tiến từng frame bằng phím , . hoặc ← →; đổi phím tắt trong Cài đặt",
-    "Ctrl + lăn chuột để zoom ngay vị trí con chuột, kéo chuột để di chuyển khung hình",
-    "Click phải vào video để mở trong cửa sổ khác; click phải file trong Windows cũng có mục mở cửa sổ mới",
-    "Double-click file video trong Windows là mở ngay bằng M PlayO",
-    "Tự kiểm tra và cài bản cập nhật mới"
+    "Nút “Đặt làm app mặc định” trong Cài đặt: mở mọi file MP4, MOV, AVI, MKV, WebM… bằng M PlayO, có hiện từng đuôi file đã là mặc định hay chưa"
   ],
-  "improved": [],
+  "improved": [
+    "M PlayO hiện gọn 1 dòng trong danh sách “Mở bằng” của Windows"
+  ],
   "fixed": []
 }

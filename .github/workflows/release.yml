@@ -3,7 +3,7 @@ name: Release
 on:
   push:
     tags: ['v*']
-    branches: ['**']
+    branches: ['main']
     paths: ['package.json', 'whatsnew.json', '.github/workflows/release.yml']
   workflow_dispatch:
 permissions:

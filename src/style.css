@@ -170,6 +170,14 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.4);box-shadow:0
 .news-grp.new{color:#3DDC8A}.news-grp.improved{color:#5FB2FF}.news-grp.fixed{color:var(--warn)}
 .modal-b ul{margin:0;padding-left:18px}.modal-b li{margin:3px 0}
 
+/* app mặc định */
+.assoc{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.assoc .ext{font-size:11.5px;padding:1px 8px;border-radius:20px;border:1px solid var(--line);color:var(--muted);font-variant-numeric:tabular-nums}
+.assoc .ext.ok{color:#3DDC8A;border-color:#2eb87255;background:#2eb87214}
+.empty{grid-template-rows:auto auto;align-content:center;gap:14px}
+.linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;height:auto;padding:2px 4px;justify-self:center}
+.linkbtn:hover:not(:disabled){color:var(--text);transform:none}
+
 /* toast */
 .toast{position:fixed;left:50%;bottom:86px;transform:translateX(-50%);z-index:70;background:var(--panel);border:1px solid var(--line);
   border-left:3px solid var(--red);border-radius:6px;padding:8px 14px;box-shadow:0 10px 26px rgba(0,0,0,.45);animation:rise .25s var(--ease-out);
