@@ -5,7 +5,9 @@ App Windows để xem nhanh video **MP4, MOV, AVI, MKV, WebM**, có xem cả MOV
 - Double-click file video trong Windows là mở ngay. Kéo thả file vào cửa sổ cũng được.
 - Click phải vào video trong app, hoặc click phải file trong Windows Explorer, để mở trong cửa sổ mới.
 - Kéo timeline tự do. Lùi / tiến 1 frame bằng `,` `.` hoặc `←` `→`, giữ `Shift` để nhảy 10 frame.
-- `Ctrl` + lăn chuột: zoom ngay chỗ con chuột. Kéo chuột: di chuyển khung hình. `0`: vừa khung, `1`: 100%.
+- Lăn chuột: zoom ngay chỗ con chuột. Kéo chuột: di chuyển khung hình. `0`: vừa khung, `1`: 100%.
+- Click lên video: phát / dừng. Double-click: toàn màn hình.
+- Cài đặt → "Đặt làm app mặc định": 1 lần bấm là M PlayO mở mọi định dạng video (dùng [PS-SFTA](https://github.com/DanysysTeam/PS-SFTA), MIT).
 - Đổi phím tắt trong **Cài đặt**.
 - Tự kiểm tra và cài bản cập nhật mới từ GitHub Releases.
 

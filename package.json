@@ -1,7 +1,7 @@
 {
   "name": "m-playo",
   "productName": "M PlayO",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "M PlayO - xem nhanh video MP4, MOV, AVI, xem từng frame",
   "author": "Mondiro",
   "license": "UNLICENSED",
@@ -32,6 +32,7 @@
       "main.js",
       "preload.js",
       "whatsnew.json",
+      "assoc/**",
       "src/**",
       "build/icon.png",
       "!node_modules/ffprobe-static/bin/darwin/**",
@@ -40,7 +41,8 @@
     ],
     "asarUnpack": [
       "node_modules/ffmpeg-static/**",
-      "node_modules/ffprobe-static/**"
+      "node_modules/ffprobe-static/**",
+      "assoc/**"
     ],
     "win": {
       "target": [
