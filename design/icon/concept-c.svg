@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+<defs>
+<radialGradient id="ring" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#FFE680"/><stop offset=".6" stop-color="#F5A623"/><stop offset="1" stop-color="#C46A06"/></radialGradient>
+<linearGradient id="play" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FF8A8C"/><stop offset="1" stop-color="#C41E22"/></linearGradient>
+</defs>
+<ellipse cx="256" cy="490" rx="190" ry="16" fill="#000" opacity=".28"/>
+<path fill="#8A4A05" fill-rule="evenodd" d="M256 30a230 230 0 1 1 0 460a230 230 0 1 1 0-460zM256 130a130 130 0 1 0 0 260a130 130 0 1 0 0-260z"/>
+<path fill="url(#ring)" fill-rule="evenodd" d="M256 14a230 230 0 1 1 0 460a230 230 0 1 1 0-460zM256 114a130 130 0 1 0 0 260a130 130 0 1 0 0-260z"/>
+<path d="M214 178 L214 310 Q214 334 234 322 L336 260 Q352 244 336 232 L234 170 Q214 158 214 178Z" fill="#8E0F13" transform="translate(0,12)"/>
+<path d="M214 178 L214 310 Q214 334 234 322 L336 260 Q352 244 336 232 L234 170 Q214 158 214 178Z" fill="url(#play)"/>
+<ellipse cx="150" cy="110" rx="70" ry="20" fill="#fff" opacity=".4" transform="rotate(-38 150 110)"/>
+</svg>
