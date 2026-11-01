@@ -1,11 +1,12 @@
 {
-  "version": "1.1.0",
+  "version": "1.2.0",
   "date": "2026-11-01",
   "new": [
-    "Nút “Đặt làm app mặc định” trong Cài đặt: mở mọi file MP4, MOV, AVI, MKV, WebM… bằng M PlayO, có hiện từng đuôi file đã là mặc định hay chưa"
+    "Lăn chuột trên video là zoom ngay tại vị trí con chuột (không cần giữ Ctrl)",
+    "Click lên video để phát / dừng, double-click để bật / tắt toàn màn hình"
   ],
   "improved": [
-    "M PlayO hiện gọn 1 dòng trong danh sách “Mở bằng” của Windows"
+    "Nút “Đặt làm app mặc định” giờ tự đặt hết mọi định dạng chỉ với 1 lần bấm, không phải xác nhận trong Windows nữa"
   ],
   "fixed": []
 }

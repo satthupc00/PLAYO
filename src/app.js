@@ -246,7 +246,7 @@ const endScrub = () => {
 tl.addEventListener('pointerup', endScrub);
 tl.addEventListener('pointercancel', endScrub);
 tl.addEventListener('pointerleave', () => { if (!scrub) $('tip').hidden = true; });
-tl.addEventListener('wheel', e => { if (!S.ready || e.ctrlKey) return; e.preventDefault(); step(e.deltaY > 0 || e.deltaX > 0 ? 1 : -1); }, { passive: false });
+tl.addEventListener('wheel', e => { if (!S.ready) return; e.preventDefault(); step(e.deltaY > 0 || e.deltaX > 0 ? 1 : -1); }, { passive: false });
 function showTip(clientX) {
   const r = tl.getBoundingClientRect();
   const f = frameAtX(clientX);
@@ -298,14 +298,13 @@ function zoomTo(s) {
 }
 function fit() { S.z.fit = true; layout(); showZoomBadge(); }
 
+// lăn chuột trên video = zoom ngay tại vị trí con chuột
 stage.addEventListener('wheel', e => {
-  if (!S.ready) return;
-  if (e.ctrlKey) {
-    e.preventDefault();
-    const r = stage.getBoundingClientRect();
-    const d = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
-    zoomAt(Math.exp(-d * 0.0018), e.clientX - r.left, e.clientY - r.top);
-  }
+  if (!S.ready || e.target.closest('.busy')) return;
+  e.preventDefault();
+  const r = stage.getBoundingClientRect();
+  const d = e.deltaMode === 1 ? e.deltaY * 33 : e.deltaY;
+  zoomAt(Math.exp(-d * 0.0018), e.clientX - r.left, e.clientY - r.top);
 }, { passive: false });
 
 let pan = null;
@@ -326,7 +325,12 @@ stage.addEventListener('pointermove', e => {
   applyZoom();
 });
 const endPan = () => { pan = null; stage.classList.remove('panning'); };
-stage.addEventListener('pointerup', endPan);
+// click (không kéo) = phát / dừng; double-click = 2 lần click (trạng thái phát giữ nguyên) + toàn màn hình
+stage.addEventListener('pointerup', e => {
+  const click = pan && !pan.moved && e.button === 0;
+  endPan();
+  if (click) togglePlay();
+});
 stage.addEventListener('pointercancel', endPan);
 stage.addEventListener('dblclick', e => { if (S.ready && !e.target.closest('.busy')) toggleFullscreen(); });
 new ResizeObserver(() => { if (S.ready) { if (S.z.fit) layout(); updateTicks(); } }).observe(stage);
@@ -386,9 +390,10 @@ function refreshTitles() {
   const kb = a => (keymap[a] || []).slice(0, 2).map(kbdHtml).join(' ');
   $('emptyKeys').innerHTML = [['playPause'], ['prevFrame', 'nextFrame'], ['prev10', 'next10'], ['fit']]
     .map(g => `<span>${g.map(kb).join(' &nbsp;')}</span><span>${g.map(a => LABEL[a]).join(' / ')}</span>`).join('') +
-    `<span><kbd>Ctrl</kbd>+lăn chuột</span><span>Zoom tại con chuột · kéo chuột để di chuyển</span>`;
+    `<span>Lăn chuột</span><span>Zoom tại con chuột · kéo chuột để di chuyển</span>` +
+    `<span>Click / double-click</span><span>Phát–dừng / toàn màn hình</span>`;
   const p = (keymap.prevFrame || [])[0], n = (keymap.nextFrame || [])[0];
-  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · Ctrl+lăn chuột: zoom · Kéo: di chuyển · Click phải: thêm`;
+  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · Lăn chuột: zoom · Kéo: di chuyển · Click: phát/dừng · Double-click: toàn màn hình`;
 }
 
 /* ================= Bàn phím ================= */

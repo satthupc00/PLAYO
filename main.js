@@ -316,8 +316,8 @@ async function assocStatus() {
   if (!isWin) return { supported: false, list: [] };
   const list = await Promise.all(ASSOC_EXT.map(async ext => {
     const base = 'HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\FileExts\\' + ext;
-    const uc = (await regValue(base + '\\UserChoiceLatest\\ProgId', 'ProgId')) || (await regValue(base + '\\UserChoiceLatest', 'ProgId')) ||
-      (await regValue(base + '\\UserChoice', 'ProgId'));
+    const uc = (await regValue(base + '\\UserChoice', 'ProgId')) ||
+      (await regValue(base + '\\UserChoiceLatest\\ProgId', 'ProgId')) || (await regValue(base + '\\UserChoiceLatest', 'ProgId'));
     const cls = uc ? null : await regValue('HKCU\\Software\\Classes\\' + ext);
     const prog = uc || cls || '';
     const mine = prog === PROGID || /M PlayO\.exe/i.test(prog);
@@ -364,10 +364,21 @@ async function autoRegisterAssoc() {
   } catch {}
 }
 ipcMain.handle('assoc-status', () => assocStatus());
+// Đặt mặc định trực tiếp bằng Set-FTA (PS-SFTA) giống app M-View, không cần người dùng xác nhận trong Windows
+function setFTA(exts) {
+  const { execFile } = require('child_process');
+  const script = path.join(__dirname, 'assoc', 'set-default.ps1').replace(/app\.asar([\\/])/, 'app.asar.unpacked$1');
+  const pairs = exts.map(e => `${PROGID}=${e}`).join(';');
+  return new Promise(res => execFile('powershell.exe',
+    ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', script, '-Pairs', pairs],
+    { windowsHide: true, timeout: 90000 }, (_err, out) => res(String(out || ''))));
+}
 ipcMain.handle('assoc-set-default', async () => {
   if (!isWin) return { supported: false };
   const st = await assocStatus();
   await registerAssoc(st.list.filter(x => !x.locked).map(x => x.ext));
+  const todo = (await assocStatus()).list.filter(x => !x.mine).map(x => x.ext);
+  if (todo.length) await setFTA(todo);
   const after = await assocStatus();
   if (after.all) return { done: true, status: after };
   await shell.openExternal('ms-settings:defaultapps?registeredAppUser=' + encodeURIComponent(APPNAME));
