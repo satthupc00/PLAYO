@@ -408,6 +408,8 @@ const endPan = () => { pan = null; stage.classList.remove('panning'); };
 // click (không kéo) = phát / dừng; double-click = 2 lần click (trạng thái phát giữ nguyên) + toàn màn hình
 stage.addEventListener('pointerup', e => {
   const click = pan && !pan.moved && !pan.cancel && e.button === 0;
+  const midClick = pan && !pan.moved && e.button === 1;   // click chuột giữa = zoom vừa khung
+  if (midClick) { endPan(); fit(); return; }
   endPan();
   if (click) togglePlay();
 });
@@ -437,7 +439,10 @@ video.volume = store.get('vol', 1); $('vol').value = video.volume;
 setLoop(store.get('loop', true)); setMute(store.get('muted', false));
 
 async function toggleFullscreen() { await api.toggleFullscreen(); }
-api.on('fullscreen', v => { document.body.classList.toggle('fs', v); bumpIdle(); });
+api.on('fullscreen', v => {
+  document.body.classList.toggle('fs', v); bumpIdle();
+  if (S.ready) fit();   // vào / thoát toàn màn hình: video zoom vừa khung, căn giữa
+});
 let idleTimer = 0;
 function bumpIdle() {
   document.body.classList.remove('idle');
