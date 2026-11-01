@@ -1,25 +1,50 @@
 name: Release
+# Tự build bản Windows và tạo GitHub Release khi version trong package.json chưa có Release.
 on:
   push:
     tags: ['v*']
+    branches: ['**']
+    paths: ['package.json', 'whatsnew.json', '.github/workflows/release.yml']
+  workflow_dispatch:
 permissions:
   contents: write
+concurrency:
+  group: release
+  cancel-in-progress: false
 jobs:
   windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
+      - name: Đọc version
+        id: v
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          echo "tag=v$VER" >> "$GITHUB_OUTPUT"
+          if gh release view "v$VER" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"; echo "Release v$VER đã có, bỏ qua."
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
       - uses: actions/setup-node@v4
+        if: steps.v.outputs.skip == 'false'
         with:
           node-version: 20
-      - run: npm install
-      - run: npx electron-builder --win --publish always
+      - if: steps.v.outputs.skip == 'false'
+        run: npm ci
+      - name: Build + publish
+        if: steps.v.outputs.skip == 'false'
+        run: npx electron-builder --win --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Ghi bảng thông báo cập nhật vào Release
+        if: steps.v.outputs.skip == 'false'
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           node scripts/notes.js > notes.md
-          gh release edit "${GITHUB_REF_NAME}" --title "M PlayO ${GITHUB_REF_NAME}" --notes-file notes.md
+          gh release edit "${{ steps.v.outputs.tag }}" --repo "$GITHUB_REPOSITORY" --title "M PlayO ${{ steps.v.outputs.tag }}" --notes-file notes.md --draft=false --latest

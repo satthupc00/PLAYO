@@ -13,6 +13,6 @@ App Windows để xem nhanh video **MP4, MOV, AVI, MKV, WebM**, có xem cả MOV
 Vào trang [Releases](https://github.com/satthupc00/PLAYO/releases/latest), tải file `M-PlayO-Setup-x.y.z.exe` rồi chạy.
 
 ## Phát hành bản mới (cho dev)
-Tăng `version` trong `package.json`, cập nhật `whatsnew.json`, rồi push tag `vX.Y.Z`. GitHub Actions sẽ tự build và tạo Release.
+Tăng `version` trong `package.json`, cập nhật `whatsnew.json` rồi push. GitHub Actions sẽ tự build và tạo Release `vX.Y.Z` nếu bản đó chưa có.
 
 Created by Mondiro
