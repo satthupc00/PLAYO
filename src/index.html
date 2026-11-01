@@ -55,6 +55,7 @@
     <div class="track"></div>
     <div class="ticks" id="ticks"></div>
     <div class="fill" id="fill"></div>
+    <div class="rng" id="rng" hidden><i class="rh a" title="Kéo để chỉnh điểm đầu đoạn"></i><i class="rh b" title="Kéo để chỉnh điểm cuối đoạn"></i></div>
     <div class="hover-line" id="hoverLine"></div>
     <div class="head" id="head"></div>
     <div class="tip" id="tip" hidden></div>
@@ -73,6 +74,9 @@
     </div>
     <div class="grp r">
       <button type="button" class="chip" id="btnSpeed" title="Tốc độ (J chậm / L nhanh)">1×</button>
+      <button type="button" class="chip range-chip" id="btnRange" hidden></button>
+      <button type="button" class="ibtn ghost" data-act="markIn" title="Đặt điểm đầu đoạn (I)" aria-label="Đặt điểm đầu đoạn"><svg viewBox="0 0 24 24"><path d="M10 4H6v16h4M14 12h5"/></svg></button>
+      <button type="button" class="ibtn ghost" data-act="markOut" title="Đặt điểm cuối đoạn (O)" aria-label="Đặt điểm cuối đoạn"><svg viewBox="0 0 24 24"><path d="M14 4h4v16h-4M5 12h5"/></svg></button>
       <button type="button" class="chip" id="btnLoop" data-act="loop" title="Lặp lại (R)">Lặp</button>
       <button type="button" class="ibtn ghost" id="btnMute" data-act="mute" title="Tắt tiếng (M)" aria-label="Tắt tiếng">
         <svg class="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7"/></svg>

@@ -18,9 +18,13 @@ const ACTIONS = [
   ['pause', 'Dừng', ['KeyK']],
   ['faster', 'Nhanh lên', ['KeyL']],
   ['loop', 'Bật / tắt lặp lại', ['KeyR']],
+  ['markIn', 'Đặt điểm đầu đoạn', ['KeyI']],
+  ['markOut', 'Đặt điểm cuối đoạn', ['KeyO']],
+  ['clearRange', 'Xoá đoạn đánh dấu', ['KeyX']],
   ['mute', 'Tắt / bật tiếng', ['KeyM']],
   ['fullscreen', 'Toàn màn hình', ['KeyF']],
   ['fit', 'Zoom vừa khung', ['Digit0']],
+  ['fitWindow', 'Co cửa sổ vừa khít video (giữ chuột trái + click phải)', []],
   ['actual', 'Zoom 100% (kích thước gốc)', ['Digit1']],
   ['open', 'Mở video', ['Ctrl+KeyO']],
   ['newWindow', 'Mở video này trong cửa sổ mới', ['Ctrl+KeyN']]
@@ -55,7 +59,9 @@ function esc(s) { return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<':
 const S = {
   file: null, name: '', fps: 30, frames: 0, frame: 0, ready: false, token: 0,
   z: { s: 1, x: 0, y: 0, fit: true },
-  speedIdx: 3
+  speedIdx: 3,
+  loop: true,
+  range: null // đoạn đánh dấu {a, b}: frame đầu và frame cuối (tính cả 2)
 };
 const SPEEDS = [0.1, 0.25, 0.5, 1, 1.5, 2, 4];
 
@@ -78,6 +84,7 @@ async function openFile(file) {
   video.pause();
   S.ready = false;
   seekBusy = false; seekTarget = null; // bỏ lệnh tua còn dở của video cũ
+  setRange(null);
   showBusyLater('Đang mở…');
   const r = await api.open(file);
   if (token !== S.token) return;
@@ -189,14 +196,67 @@ if ('requestVideoFrameCallback' in HTMLVideoElement.prototype) {
 
 function play() {
   if (!S.ready) return;
-  if (S.frame >= S.frames - 1 && !video.loop) { S.frame = 0; video.currentTime = 0; }
+  if (rangeActive()) {
+    const { a, b } = S.range;
+    if (S.frame < a || S.frame >= b) { S.frame = a; seekTime((a + 0.5) / S.fps); }
+  } else if (S.frame >= S.frames - 1 && !video.loop) { S.frame = 0; video.currentTime = 0; }
   video.play().catch(() => {});
 }
 function togglePlay() { if (!S.ready) return; video.paused ? play() : pause(); }
 function pause() { if (!video.paused) { video.pause(); S.frame = frameFromTime(video.currentTime); seekFrame(S.frame); } }
 video.addEventListener('play', () => document.body.classList.add('playing'));
 video.addEventListener('pause', () => { document.body.classList.remove('playing'); updateUI(); });
-video.addEventListener('ended', () => { S.frame = S.frames - 1; updateUI(); });
+video.addEventListener('ended', () => {
+  if (rangeActive()) { S.frame = S.range.a; seekTime((S.range.a + 0.5) / S.fps); video.play().catch(() => {}); return; }
+  S.frame = S.frames - 1; updateUI();
+});
+
+/* ================= Đánh dấu đoạn + lặp đoạn ================= */
+const rangeActive = () => !!(S.loop && S.range && S.ready);
+const curFrame = () => video.paused ? S.frame : frameFromTime(video.currentTime);
+function applyLoop() {
+  video.loop = S.loop && !S.range;          // có đoạn đánh dấu thì app tự lặp trong đoạn
+  $('btnLoop').classList.toggle('on', S.loop);
+  $('btnLoop').textContent = S.loop && S.range ? 'Lặp đoạn' : 'Lặp';
+  $('rng').classList.toggle('off', !S.loop);
+}
+function setRange(a, b) {
+  if (a == null || !S.frames) S.range = null;
+  else {
+    a = clamp(a, 0, S.frames - 1); b = clamp(b, 0, S.frames - 1);
+    if (a > b) [a, b] = [b, a];
+    S.range = { a, b };
+  }
+  applyLoop(); renderRange();
+}
+function renderRange() {
+  const r = S.range, el = $('rng'), chip = $('btnRange');
+  el.hidden = chip.hidden = !r;
+  if (!r) return;
+  el.style.left = (r.a / S.frames * 100) + '%';
+  el.style.width = ((r.b - r.a + 1) / S.frames * 100) + '%';
+  chip.textContent = `F${r.a + 1}–F${r.b + 1}`;
+  chip.title = `Đoạn đánh dấu: ${r.b - r.a + 1} frame (${fmtTime(r.a / S.fps)} → ${fmtTime((r.b + 1) / S.fps)}) · bấm để xoá (${keyText('clearRange') || 'X'})`;
+}
+function markIn() {
+  if (!S.ready) return;
+  const f = curFrame(), b = S.range ? S.range.b : S.frames - 1;
+  setRange(f, f > b ? S.frames - 1 : b);
+  toast(`Điểm đầu đoạn: F${S.range.a + 1}`);
+}
+function markOut() {
+  if (!S.ready) return;
+  const f = curFrame(), a = S.range ? S.range.a : 0;
+  setRange(f < a ? 0 : a, f);
+  toast(`Điểm cuối đoạn: F${S.range.b + 1}`);
+}
+function clearRange() { if (S.range) { setRange(null); toast('Đã xoá đoạn đánh dấu'); } }
+// đang phát + lặp đoạn: tới cuối đoạn thì quay về đầu đoạn
+function enforceRange() {
+  if (!rangeActive() || video.paused || seekBusy || scrub) return;
+  const { a, b } = S.range, t = video.currentTime;
+  if (t >= (b + 1) / S.fps - 0.25 / S.fps || t < (a - 0.5) / S.fps) { S.frame = a; seekTime((a + 0.5) / S.fps); }
+}
 
 /* ================= Timeline ================= */
 let lastTc = '';
@@ -210,7 +270,7 @@ function updateUI() {
   const tc = `${fmtTime(S.frame / S.fps)} <span>/ ${fmtTime(S.frames / S.fps)}</span> &nbsp; F${S.frame + 1} <span>/ ${S.frames}</span>`;
   if (tc !== lastTc) { $('tc').innerHTML = tc; lastTc = tc; $('osd').textContent = `Frame ${S.frame + 1} / ${S.frames}`; }
 }
-(function loop() { if (S.ready && !video.paused) updateUI(); requestAnimationFrame(loop); })();
+(function loop() { if (S.ready && !video.paused) { enforceRange(); updateUI(); } requestAnimationFrame(loop); })();
 
 function updateTicks() {
   const w = tl.clientWidth, px = S.frames ? w / S.frames : 0;
@@ -223,19 +283,28 @@ const frameAtX = clientX => {
   return clamp(Math.floor((clientX - r.left) / r.width * S.frames), 0, S.frames - 1);
 };
 let scrub = null;
+// kéo timeline = tua; kéo 2 đầu đoạn đỏ = chỉnh đoạn; Shift + kéo = đánh dấu đoạn mới
 tl.addEventListener('pointerdown', e => {
   if (!S.ready || e.button !== 0) return;
   tl.setPointerCapture(e.pointerId);
-  scrub = { wasPlaying: !video.paused };
+  const f = frameAtX(e.clientX);
+  const h = e.target.closest('.rh');
+  scrub = { wasPlaying: !video.paused, handle: h ? (h.classList.contains('a') ? 'a' : 'b') : null, start: e.shiftKey ? f : null };
   video.pause();
   tl.classList.add('drag');
-  seekFrame(frameAtX(e.clientX));
+  if (scrub.start != null) setRange(f, f);
+  if (!scrub.handle) seekFrame(f);
   showTip(e.clientX);
 });
 tl.addEventListener('pointermove', e => {
   if (!S.ready) return;
   showTip(e.clientX);
-  if (scrub) seekFrame(frameAtX(e.clientX));
+  if (!scrub) return;
+  const f = frameAtX(e.clientX);
+  if (scrub.handle === 'a') setRange(Math.min(f, S.range.b), S.range.b);
+  else if (scrub.handle === 'b') setRange(S.range.a, Math.max(f, S.range.a));
+  else if (scrub.start != null) setRange(scrub.start, f);
+  seekFrame(f);
 });
 const endScrub = () => {
   if (!scrub) return;
@@ -266,7 +335,7 @@ function layout() {
   const W = stage.clientWidth, H = stage.clientHeight;
   video.style.width = vw + 'px'; video.style.height = vh + 'px';
   if (S.z.fit) {
-    const s = Math.min(W / vw, H / vh) * 0.98;
+    const s = Math.min(W / vw, H / vh);
     S.z = { s, x: (W - vw * s) / 2, y: (H - vh * s) / 2, fit: true };
   }
   applyZoom();
@@ -308,6 +377,17 @@ stage.addEventListener('wheel', e => {
 }, { passive: false });
 
 let pan = null;
+// Giữ chuột trái + click chuột phải = co cửa sổ app vừa khít video đang xem
+function fitWindow() {
+  if (!S.ready || document.body.classList.contains('fs')) return;
+  const [vw, vh] = vSize();
+  api.fitWindow({ sw: vw * S.z.s, sh: vh * S.z.s, cw: innerWidth - stage.clientWidth, ch: innerHeight - stage.clientHeight });
+  S.z.fit = true;
+}
+let skipMenu = false;
+function chordFit() { skipMenu = true; if (pan) pan.cancel = true; fitWindow(); }
+// đang giữ chuột trái mà bấm thêm chuột phải: trình duyệt báo bằng pointermove (button = 2)
+stage.addEventListener('pointermove', e => { if (e.button === 2 && (e.buttons & 3) === 3) chordFit(); });
 stage.addEventListener('pointerdown', e => {
   if (!S.ready || (e.button !== 0 && e.button !== 1)) return;
   if (e.target.closest('.busy')) return;
@@ -327,7 +407,7 @@ stage.addEventListener('pointermove', e => {
 const endPan = () => { pan = null; stage.classList.remove('panning'); };
 // click (không kéo) = phát / dừng; double-click = 2 lần click (trạng thái phát giữ nguyên) + toàn màn hình
 stage.addEventListener('pointerup', e => {
-  const click = pan && !pan.moved && e.button === 0;
+  const click = pan && !pan.moved && !pan.cancel && e.button === 0;
   endPan();
   if (click) togglePlay();
 });
@@ -347,9 +427,10 @@ $('btnSpeed').addEventListener('click', e => {
   if (e.shiftKey) cycleSpeed(-1);
   else if (S.speedIdx === SPEEDS.length - 1) cycleSpeed(-(SPEEDS.length - 1 - 3)); else cycleSpeed(1);
 });
+$('btnRange').addEventListener('click', clearRange);
 $('btnSpeed').addEventListener('contextmenu', e => { e.preventDefault(); e.stopPropagation(); cycleSpeed(-1); });
 
-function setLoop(v) { video.loop = v; $('btnLoop').classList.toggle('on', v); store.set('loop', v); }
+function setLoop(v) { S.loop = v; store.set('loop', v); applyLoop(); }
 function setMute(v) { video.muted = v; document.body.classList.toggle('muted-on', v); store.set('muted', v); }
 $('vol').addEventListener('input', e => { video.volume = +e.target.value; store.set('vol', video.volume); if (video.muted && video.volume > 0) setMute(false); });
 video.volume = store.get('vol', 1); $('vol').value = video.volume;
@@ -375,8 +456,8 @@ const RUN = {
   prev10: () => step(-10), next10: () => step(10),
   home: () => { pause(); seekFrame(0); }, end: () => { pause(); seekFrame(S.frames - 1); },
   slower: () => cycleSpeed(-1), faster: () => { cycleSpeed(1); if (video.paused) play(); }, pause: () => pause(),
-  loop: () => setLoop(!video.loop), mute: () => setMute(!video.muted),
-  fullscreen: toggleFullscreen, fit: () => S.ready && fit(), actual: () => S.ready && zoomTo(1),
+  loop: () => setLoop(!S.loop), markIn, markOut, clearRange, mute: () => setMute(!video.muted),
+  fullscreen: toggleFullscreen, fit: () => S.ready && fit(), fitWindow, actual: () => S.ready && zoomTo(1),
   open: () => openDialog(false), newWindow: () => S.file ? api.newWindow(S.file) : openDialog(true)
 };
 document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => RUN[b.dataset.act]()));
@@ -388,12 +469,12 @@ function refreshTitles() {
   });
   $('btnSpeed').title = `Tốc độ (${keyText('slower') || '-'} chậm / ${keyText('faster') || '-'} nhanh)`;
   const kb = a => (keymap[a] || []).slice(0, 2).map(kbdHtml).join(' ');
-  $('emptyKeys').innerHTML = [['playPause'], ['prevFrame', 'nextFrame'], ['prev10', 'next10'], ['fit']]
+  $('emptyKeys').innerHTML = [['playPause'], ['prevFrame', 'nextFrame'], ['prev10', 'next10'], ['markIn', 'markOut'], ['fit']]
     .map(g => `<span>${g.map(kb).join(' &nbsp;')}</span><span>${g.map(a => LABEL[a]).join(' / ')}</span>`).join('') +
     `<span>Lăn chuột</span><span>Zoom tại con chuột · kéo chuột để di chuyển</span>` +
     `<span>Click / double-click</span><span>Phát–dừng / toàn màn hình</span>`;
   const p = (keymap.prevFrame || [])[0], n = (keymap.nextFrame || [])[0];
-  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · Lăn chuột: zoom · Kéo: di chuyển · Click: phát/dừng · Double-click: toàn màn hình`;
+  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · ${comboLabel((keymap.markIn || ['I'])[0])}/${comboLabel((keymap.markOut || ['O'])[0])}: đánh dấu đoạn lặp · Lăn chuột: zoom · Kéo: di chuyển · Click: phát/dừng · Double-click: toàn màn hình · Giữ trái + click phải: cửa sổ vừa video`;
 }
 
 /* ================= Bàn phím ================= */
@@ -427,7 +508,12 @@ function showMenu(x, y) {
     '-',
     ['Zoom vừa khung', 'fit', !S.ready],
     ['Zoom 100%', 'actual', !S.ready],
+    ['Co cửa sổ vừa khít video', 'fitWindow', !S.ready],
     ['Toàn màn hình', 'fullscreen'],
+    '-',
+    ['Đặt điểm đầu đoạn', 'markIn', !S.ready],
+    ['Đặt điểm cuối đoạn', 'markOut', !S.ready],
+    ['Xoá đoạn đánh dấu', 'clearRange', !S.range],
     '-',
     ['Hiện file trong thư mục', () => api.showInFolder(S.file), !has]
   ];
@@ -448,7 +534,12 @@ function showMenu(x, y) {
   m.style.top = clamp(y, 4, innerHeight - r.height - 4) + 'px';
 }
 function hideMenu() { $('menu').hidden = true; }
-stage.addEventListener('contextmenu', e => { e.preventDefault(); showMenu(e.clientX, e.clientY); });
+stage.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  if (skipMenu) { skipMenu = false; return; }
+  if (e.buttons & 1) return chordFit();
+  showMenu(e.clientX, e.clientY);
+});
 document.addEventListener('pointerdown', e => { if (!e.target.closest('.menu')) hideMenu(); }, true);
 window.addEventListener('blur', hideMenu);
 

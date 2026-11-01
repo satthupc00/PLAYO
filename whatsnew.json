@@ -1,12 +1,12 @@
 {
-  "version": "1.2.0",
+  "version": "1.3.0",
   "date": "2026-11-01",
   "new": [
-    "Lăn chuột trên video là zoom ngay tại vị trí con chuột (không cần giữ Ctrl)",
-    "Click lên video để phát / dừng, double-click để bật / tắt toàn màn hình"
+    "Đánh dấu 1 đoạn trên video: phím I (điểm đầu), O (điểm cuối), hoặc giữ Shift rồi kéo trên timeline",
+    "Khi bật Lặp, video chỉ phát trong đoạn đã đánh dấu rồi lặp lại (nút hiện “Lặp đoạn”)",
+    "Kéo 2 đầu đỏ của đoạn trên timeline để chỉnh; bấm X hoặc nút F..–F.. để xoá đoạn",
+    "Giữ chuột trái + click chuột phải lên video: cửa sổ app tự co vừa khít video đang xem (theo mức zoom hiện tại, không vượt quá màn hình)"
   ],
-  "improved": [
-    "Nút “Đặt làm app mặc định” giờ tự đặt hết mọi định dạng chỉ với 1 lần bấm, không phải xác nhận trong Windows nữa"
-  ],
+  "improved": [],
   "fixed": []
 }
