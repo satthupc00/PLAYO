@@ -408,12 +408,21 @@ const endPan = () => { pan = null; stage.classList.remove('panning'); };
 // click (không kéo) = phát / dừng; double-click = 2 lần click (trạng thái phát giữ nguyên) + toàn màn hình
 stage.addEventListener('pointerup', e => {
   const click = pan && !pan.moved && !pan.cancel && e.button === 0;
+  const midClick = pan && !pan.moved && e.button === 1;   // click chuột giữa = zoom vừa khung
+  if (midClick) { endPan(); fit(); return; }
   endPan();
   if (click) togglePlay();
 });
 stage.addEventListener('pointercancel', endPan);
 stage.addEventListener('dblclick', e => { if (S.ready && !e.target.closest('.busy')) toggleFullscreen(); });
-new ResizeObserver(() => { if (S.ready) { if (S.z.fit) layout(); updateTicks(); } }).observe(stage);
+// vào / thoát toàn màn hình: đưa video về 100% và căn giữa (chờ cửa sổ đổi kích thước xong)
+let recenterUntil = 0;
+function recenter100() { if (S.ready) { zoomTo(1); showZoomBadge(); } }
+new ResizeObserver(() => {
+  if (!S.ready) return;
+  if (Date.now() < recenterUntil) recenter100(); else if (S.z.fit) layout();
+  updateTicks();
+}).observe(stage);
 new ResizeObserver(() => { if (S.ready) updateTicks(); }).observe(tl);
 
 /* ================= Các nút ================= */
@@ -437,7 +446,10 @@ video.volume = store.get('vol', 1); $('vol').value = video.volume;
 setLoop(store.get('loop', true)); setMute(store.get('muted', false));
 
 async function toggleFullscreen() { await api.toggleFullscreen(); }
-api.on('fullscreen', v => { document.body.classList.toggle('fs', v); bumpIdle(); });
+api.on('fullscreen', v => {
+  document.body.classList.toggle('fs', v); bumpIdle();
+  recenterUntil = Date.now() + 1200; recenter100();
+});
 let idleTimer = 0;
 function bumpIdle() {
   document.body.classList.remove('idle');
