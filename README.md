@@ -1,0 +1,18 @@
+# M PlayO
+
+App Windows để xem nhanh video **MP4, MOV, AVI, MKV, WebM**, có xem cả MOV ProRes và AVI.
+
+- Double-click file video trong Windows là mở ngay. Kéo thả file vào cửa sổ cũng được.
+- Click phải vào video trong app, hoặc click phải file trong Windows Explorer, để mở trong cửa sổ mới.
+- Kéo timeline tự do. Lùi / tiến 1 frame bằng `,` `.` hoặc `←` `→`, giữ `Shift` để nhảy 10 frame.
+- `Ctrl` + lăn chuột: zoom ngay chỗ con chuột. Kéo chuột: di chuyển khung hình. `0`: vừa khung, `1`: 100%.
+- Đổi phím tắt trong **Cài đặt**.
+- Tự kiểm tra và cài bản cập nhật mới từ GitHub Releases.
+
+## Cài đặt
+Vào trang [Releases](https://github.com/satthupc00/PLAYO/releases/latest), tải file `M-PlayO-Setup-x.y.z.exe` rồi chạy.
+
+## Phát hành bản mới (cho dev)
+Tăng `version` trong `package.json`, cập nhật `whatsnew.json`, rồi push tag `vX.Y.Z`. GitHub Actions sẽ tự build và tạo Release.
+
+Created by Mondiro
