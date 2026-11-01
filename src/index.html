@@ -35,6 +35,7 @@
       <div class="formats">MP4 · MOV · AVI · MKV · WebM</div>
       <div class="keys" id="emptyKeys"></div>
     </div>
+    <button type="button" class="linkbtn" id="btnDefault2" hidden>Đặt M PlayO làm app mặc định để double-click là mở</button>
   </div>
 
   <div class="busy" id="busy" hidden>
@@ -97,6 +98,9 @@
       <h3>Phím tắt <span class="muted">— bấm vào ô rồi nhấn phím mới, Delete để xoá</span></h3>
       <div class="keymap" id="keymap"></div>
       <div class="row-btns"><button type="button" id="btnResetKeys">Khôi phục mặc định</button></div>
+      <h3>Ứng dụng mặc định</h3>
+      <div class="set-row"><span class="muted" id="assocText">Mở mọi file MP4, MOV, AVI, MKV, WebM… bằng M PlayO khi double-click.</span><button type="button" class="primary" id="btnDefault">Đặt làm app mặc định</button></div>
+      <div class="assoc" id="assocList"></div>
       <h3>Bộ nhớ tạm</h3>
       <div class="set-row"><span class="muted">File AVI / ProRes được chuyển đổi sẵn để mở lại tức thì (tự xoá sau 3 ngày).</span><button type="button" id="btnClearCache">Xoá bộ nhớ tạm</button></div>
       <h3>Phiên bản</h3>

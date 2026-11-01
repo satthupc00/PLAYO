@@ -8,6 +8,10 @@
   DeleteRegKey HKCU "Software\Classes\SystemFileAssociations\${EXT}\shell\MPlayONewWindow"
 !macroend
 
+!macro MPlayOOpenWithRemove EXT
+  DeleteRegValue HKCU "Software\Classes\${EXT}\OpenWithProgids" "MPlayO.Video"
+!macroend
+
 !macro customInstall
   !insertmacro MPlayOVerb ".mp4"
   !insertmacro MPlayOVerb ".m4v"
@@ -21,6 +25,21 @@
 !macroend
 
 !macro customUnInstall
+  DeleteRegKey HKCU "Software\Classes\MPlayO.Video"
+  DeleteRegKey HKCU "Software\Mondiro\MPlayO"
+  DeleteRegValue HKCU "Software\RegisteredApplications" "M PlayO"
+  DeleteRegKey HKCU "Software\Classes\Applications\${APP_EXECUTABLE_FILENAME}"
+  !insertmacro MPlayOOpenWithRemove ".mp4"
+  !insertmacro MPlayOOpenWithRemove ".m4v"
+  !insertmacro MPlayOOpenWithRemove ".mov"
+  !insertmacro MPlayOOpenWithRemove ".avi"
+  !insertmacro MPlayOOpenWithRemove ".mkv"
+  !insertmacro MPlayOOpenWithRemove ".webm"
+  !insertmacro MPlayOOpenWithRemove ".wmv"
+  !insertmacro MPlayOOpenWithRemove ".mpg"
+  !insertmacro MPlayOOpenWithRemove ".mpeg"
+  !insertmacro MPlayOOpenWithRemove ".mts"
+  !insertmacro MPlayOOpenWithRemove ".m2ts"
   !insertmacro MPlayOVerbRemove ".mp4"
   !insertmacro MPlayOVerbRemove ".m4v"
   !insertmacro MPlayOVerbRemove ".mov"

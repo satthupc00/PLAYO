@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('api', {
   updateState: () => ipcRenderer.invoke('update-state'),
   downloadUpdate: () => ipcRenderer.invoke('update-download'),
   whatsNew: () => { try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'whatsnew.json'), 'utf8')); } catch { return null; } },
+  assocStatus: () => ipcRenderer.invoke('assoc-status'),
+  setDefaultApp: () => ipcRenderer.invoke('assoc-set-default'),
   pathForFile: f => webUtils.getPathForFile(f),
   on: (ch, cb) => ipcRenderer.on(ch, (_e, v) => cb(v))
 });

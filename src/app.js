@@ -470,7 +470,33 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m); });
   m.querySelector('[data-close]').addEventListener('click', () => closeModal(m));
 });
-$('btnSettings').addEventListener('click', () => { renderKeymap(); openModal('settingsModal'); });
+$('btnSettings').addEventListener('click', () => { renderKeymap(); refreshAssoc(); openModal('settingsModal'); });
+
+/* ================= App mặc định ================= */
+async function refreshAssoc() {
+  const st = await api.assocStatus();
+  const box = $('assocList');
+  if (!st.supported) { $('assocText').textContent = 'Chỉ dùng được trên Windows.'; $('btnDefault').disabled = true; box.innerHTML = ''; return st; }
+  box.innerHTML = st.list.map(x => `<span class="ext${x.mine ? ' ok' : ''}" title="${x.mine ? 'Đang mở bằng M PlayO' : 'Đang mở bằng app khác'}">${x.ext.slice(1).toUpperCase()}${x.mine ? ' ✓' : ''}</span>`).join('');
+  const n = st.list.filter(x => x.mine).length;
+  $('assocText').textContent = st.all ? 'M PlayO đã là app mặc định cho tất cả định dạng.' : `M PlayO đang là mặc định cho ${n}/${st.list.length} định dạng.`;
+  $('btnDefault').textContent = st.all ? 'Đã là mặc định' : 'Đặt làm app mặc định';
+  $('btnDefault').disabled = st.all;
+  $('btnDefault2').hidden = st.all;
+  return st;
+}
+async function setDefaultApp() {
+  const r = await api.setDefaultApp();
+  if (!r.supported && r.supported !== undefined) return toast('Chỉ dùng được trên Windows');
+  if (r.done) toast('Đã đặt M PlayO làm app mặc định cho tất cả định dạng');
+  else if (r.opened) toast(r.win11
+    ? 'Windows cần bạn xác nhận: trong trang vừa mở, bấm “Đặt mặc định” (Set default) ở mục M PlayO'
+    : 'Windows cần bạn xác nhận: chọn “Chọn ứng dụng mặc định theo loại tệp”, rồi chọn M PlayO cho các đuôi còn lại', null, null, 9000);
+  refreshAssoc();
+}
+$('btnDefault').addEventListener('click', setDefaultApp);
+$('btnDefault2').addEventListener('click', setDefaultApp);
+window.addEventListener('focus', () => { if (!$('settingsModal').hidden || !$('btnDefault2').hidden) refreshAssoc(); });
 
 function renderKeymap() {
   const box = $('keymap');
@@ -608,5 +634,6 @@ refreshTitles();
   $('verText').textContent = 'v' + init.version;
   if (init.file) openFile(init.file);
   renderUpd(await api.updateState());
+  if (init.packaged) setTimeout(refreshAssoc, 5000);
   if (init.packaged) setTimeout(() => api.checkUpdate(), 2500);
 })();
