@@ -26,6 +26,8 @@ const ACTIONS = [
   ['volDown', 'Giảm âm lượng', ['Minus', 'NumpadSubtract']],
   ['fullscreen', 'Toàn màn hình', ['KeyF']],
   ['fit', 'Zoom vừa khung', ['Digit0']],
+  ['rotLeft', 'Xoay trái 90°', ['Ctrl+ArrowLeft']],
+  ['rotRight', 'Xoay phải 90°', ['Ctrl+ArrowRight']],
   ['fitWindow', 'Co cửa sổ vừa khít video (giữ chuột trái hoặc Ctrl + click phải)', []],
   ['actual', 'Zoom 100% (kích thước gốc)', ['Digit1']],
   ['open', 'Mở video', ['Ctrl+KeyO']],
@@ -63,6 +65,7 @@ const S = {
   z: { s: 1, x: 0, y: 0, fit: true },
   speedIdx: 3,
   loop: true,
+  rot: 0, // góc xoay video: 0 / 90 / 180 / 270
   range: null // đoạn đánh dấu {a, b}: frame đầu và frame cuối (tính cả 2)
 };
 const SPEEDS = [0.1, 0.25, 0.5, 1, 1.5, 2, 4];
@@ -87,6 +90,7 @@ async function openFile(file) {
   S.ready = false;
   seekBusy = false; seekTarget = null; // bỏ lệnh tua còn dở của video cũ
   setRange(null);
+  S.rot = 0;
   showBusyLater('Đang mở…');
   const r = await api.open(file);
   if (token !== S.token) return;
@@ -334,11 +338,15 @@ function showTip(clientX) {
 }
 
 /* ================= Zoom & pan ================= */
-function vSize() { return [video.videoWidth || (S.info && S.info.width) || 16, video.videoHeight || (S.info && S.info.height) || 9]; }
+// kích thước gốc của video
+function nSize() { return [video.videoWidth || (S.info && S.info.width) || 16, video.videoHeight || (S.info && S.info.height) || 9]; }
+// kích thước video đang hiển thị (đã tính xoay 90° / 270°)
+function vSize() { const [w, h] = nSize(); return S.rot % 180 ? [h, w] : [w, h]; }
 function layout() {
   const [vw, vh] = vSize();
   const W = stage.clientWidth, H = stage.clientHeight;
-  video.style.width = vw + 'px'; video.style.height = vh + 'px';
+  const [nw, nh] = nSize();
+  video.style.width = nw + 'px'; video.style.height = nh + 'px';
   if (S.z.fit) {
     const s = Math.min(W / vw, H / vh);
     S.z = { s, x: (W - vw * s) / 2, y: (H - vh * s) / 2, fit: true };
@@ -346,7 +354,9 @@ function layout() {
   applyZoom();
 }
 function applyZoom() {
-  video.style.transform = `translate(${S.z.x}px,${S.z.y}px) scale(${S.z.s})`;
+  const [nw, nh] = nSize(), [ew, eh] = vSize();
+  // xoay quanh tâm video, rồi đặt khung đã xoay vào vị trí (x, y) với tỉ lệ s
+  video.style.transform = `translate(${S.z.x}px,${S.z.y}px) scale(${S.z.s}) translate(${ew / 2}px,${eh / 2}px) rotate(${S.rot}deg) translate(${-nw / 2}px,${-nh / 2}px)`;
   video.classList.toggle('pixel', S.z.s >= 3);
 }
 let badgeTimer = 0;
@@ -370,6 +380,12 @@ function zoomTo(s) {
   const [vw, vh] = vSize();
   S.z.x = (r.width - vw * S.z.s) / 2; S.z.y = (r.height - vh * S.z.s) / 2;
   applyZoom();
+}
+function rotate(d) {
+  if (!S.ready) return;
+  S.rot = ((S.rot + d) % 360 + 360) % 360;
+  S.z.fit = true; layout();
+  showBadge(S.rot ? `Xoay ${S.rot}°` : 'Không xoay');
 }
 function fit() { S.z.fit = true; layout(); showZoomBadge(); }
 
@@ -480,7 +496,8 @@ const RUN = {
   slower: () => cycleSpeed(-1), faster: () => { cycleSpeed(1); if (video.paused) play(); }, pause: () => pause(),
   loop: () => setLoop(!S.loop), markIn, markOut, clearRange, mute: () => setMute(!video.muted),
   volUp: () => setVolume((video.muted ? 0 : video.volume) + 0.1, true), volDown: () => setVolume(video.volume - 0.1, true),
-  fullscreen: toggleFullscreen, fit: () => S.ready && fit(), fitWindow, actual: () => S.ready && zoomTo(1),
+  fullscreen: toggleFullscreen, fit: () => S.ready && fit(), fitWindow,
+  rotLeft: () => rotate(-90), rotRight: () => rotate(90), actual: () => S.ready && zoomTo(1),
   open: () => openDialog(false), newWindow: () => S.file ? api.newWindow(S.file) : openDialog(true)
 };
 document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => RUN[b.dataset.act]()));
@@ -533,6 +550,8 @@ function showMenu(x, y) {
     '-',
     ['Zoom vừa khung', 'fit', !S.ready],
     ['Zoom 100%', 'actual', !S.ready],
+    ['Xoay trái 90°', 'rotLeft', !S.ready],
+    ['Xoay phải 90°', 'rotRight', !S.ready],
     ['Co cửa sổ vừa khít video', 'fitWindow', !S.ready],
     ['Toàn màn hình', 'fullscreen'],
     '-',

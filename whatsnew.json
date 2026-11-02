@@ -1,11 +1,9 @@
 {
-  "version": "1.4.1",
+  "version": "1.5.0",
   "date": "2026-11-02",
   "new": [
-    "Ctrl + click chuột phải lên video cũng co cửa sổ vừa khít video"
+    "Xoay video 90°: Ctrl + ← xoay trái, Ctrl + → xoay phải (cũng có trong menu click phải, đổi phím được trong Cài đặt)"
   ],
   "improved": [],
-  "fixed": [
-    "Co cửa sổ vừa khít video khi đang zoom to: video bị lệch, giờ luôn nằm giữa"
-  ]
+  "fixed": []
 }
