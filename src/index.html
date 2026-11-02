@@ -77,13 +77,12 @@
       <button type="button" class="chip range-chip" id="btnRange" hidden></button>
       <button type="button" class="ibtn ghost" data-act="markIn" title="Đặt điểm đầu đoạn (I)" aria-label="Đặt điểm đầu đoạn"><svg viewBox="0 0 24 24"><path d="M10 4H6v16h4M14 12h5"/></svg></button>
       <button type="button" class="ibtn ghost" data-act="markOut" title="Đặt điểm cuối đoạn (O)" aria-label="Đặt điểm cuối đoạn"><svg viewBox="0 0 24 24"><path d="M14 4h4v16h-4M5 12h5"/></svg></button>
-      <button type="button" class="chip" id="btnLoop" data-act="loop" title="Lặp lại (R)">Lặp</button>
+      <button type="button" class="ibtn ghost loop-btn" id="btnLoop" data-act="loop" title="Lặp lại (R)" aria-label="Lặp lại"><svg viewBox="0 0 24 24"><path d="M17 2l4 4-4 4M3 11V9a3 3 0 0 1 3-3h15M7 22l-4-4 4-4M21 13v2a3 3 0 0 1-3 3H3"/></svg><b class="ab">A-B</b></button>
       <button type="button" class="ibtn ghost" id="btnMute" data-act="mute" title="Tắt tiếng (M)" aria-label="Tắt tiếng">
         <svg class="i-vol" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM15.5 8.5a5 5 0 0 1 0 7"/></svg>
         <svg class="i-mute" viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4zM22 9l-6 6M16 9l6 6"/></svg>
       </button>
-      <input type="range" id="vol" min="0" max="1" step="0.01" value="1" aria-label="Âm lượng">
-      <button type="button" class="ibtn ghost" data-act="fullscreen" title="Toàn màn hình (F)" aria-label="Toàn màn hình"><svg viewBox="0 0 24 24"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/></svg></button>
+      <input type="range" id="vol" min="0" max="1" step="0.01" value="1" aria-label="Âm lượng" title="Âm lượng (+ / −, lăn chuột)">
     </div>
   </div>
 </section>

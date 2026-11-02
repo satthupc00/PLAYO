@@ -22,6 +22,8 @@ const ACTIONS = [
   ['markOut', 'Đặt điểm cuối đoạn', ['KeyO']],
   ['clearRange', 'Xoá đoạn đánh dấu', ['KeyX']],
   ['mute', 'Tắt / bật tiếng', ['KeyM']],
+  ['volUp', 'Tăng âm lượng', ['Equal', 'NumpadAdd']],
+  ['volDown', 'Giảm âm lượng', ['Minus', 'NumpadSubtract']],
   ['fullscreen', 'Toàn màn hình', ['KeyF']],
   ['fit', 'Zoom vừa khung', ['Digit0']],
   ['fitWindow', 'Co cửa sổ vừa khít video (giữ chuột trái + click phải)', []],
@@ -146,7 +148,8 @@ function renderFileInfo(name, info) {
   if (info.fps) tags.push(`${+info.fps.toFixed(3)} fps`);
   if (info.vcodec) tags.push(info.vcodec.toUpperCase());
   if (info.duration) tags.push(fmtTime(info.duration));
-  fi.innerHTML = `<b title="${esc(name)}">${esc(name)}</b>` + tags.map(t => `<span class="tag">${esc(t)}</span>`).join('');
+  // chỉ hiện tên file; thông số video nằm trong tooltip
+  fi.innerHTML = `<b title="${esc(name + (tags.length ? '\n' + tags.join(' · ') : ''))}">${esc(name)}</b>`;
 }
 
 /* ================= Frame & thời gian ================= */
@@ -217,7 +220,9 @@ const curFrame = () => video.paused ? S.frame : frameFromTime(video.currentTime)
 function applyLoop() {
   video.loop = S.loop && !S.range;          // có đoạn đánh dấu thì app tự lặp trong đoạn
   $('btnLoop').classList.toggle('on', S.loop);
-  $('btnLoop').textContent = S.loop && S.range ? 'Lặp đoạn' : 'Lặp';
+  $('btnLoop').classList.toggle('range', !!(S.loop && S.range));
+  const k = keyText('loop');
+  $('btnLoop').title = (S.loop && S.range ? 'Lặp đoạn đánh dấu: đang bật' : S.loop ? 'Lặp lại: đang bật' : 'Lặp lại: đang tắt') + (k ? ` (${k})` : '');
   $('rng').classList.toggle('off', !S.loop);
 }
 function setRange(a, b) {
@@ -345,10 +350,11 @@ function applyZoom() {
   video.classList.toggle('pixel', S.z.s >= 3);
 }
 let badgeTimer = 0;
-function showZoomBadge() {
+function showZoomBadge() { showBadge(Math.round(S.z.s * 100) + '%'); }
+function showBadge(text) {
   const b = $('zoomBadge');
   b.hidden = false; b.classList.remove('fade');
-  b.textContent = Math.round(S.z.s * 100) + '%';
+  b.textContent = text;
   clearTimeout(badgeTimer);
   badgeTimer = setTimeout(() => b.classList.add('fade'), 900);
 }
@@ -381,8 +387,10 @@ let pan = null;
 function fitWindow() {
   if (!S.ready || document.body.classList.contains('fs')) return;
   const [vw, vh] = vSize();
-  api.fitWindow({ sw: vw * S.z.s, sh: vh * S.z.s, cw: innerWidth - stage.clientWidth, ch: innerHeight - stage.clientHeight });
   S.z.fit = true;
+  // sau khi cửa sổ đổi cỡ: căn video vào giữa khung (kể cả khi cửa sổ chạm cỡ tối thiểu / không đổi cỡ)
+  api.fitWindow({ sw: vw * S.z.s, sh: vh * S.z.s, cw: innerWidth - stage.clientWidth, ch: innerHeight - stage.clientHeight })
+    .then(() => { layout(); setTimeout(layout, 120); setTimeout(layout, 400); });
 }
 let skipMenu = false;
 function chordFit() { skipMenu = true; if (pan) pan.cancel = true; fitWindow(); }
@@ -434,8 +442,17 @@ $('btnSpeed').addEventListener('contextmenu', e => { e.preventDefault(); e.stopP
 
 function setLoop(v) { S.loop = v; store.set('loop', v); applyLoop(); }
 function setMute(v) { video.muted = v; document.body.classList.toggle('muted-on', v); store.set('muted', v); }
-$('vol').addEventListener('input', e => { video.volume = +e.target.value; store.set('vol', video.volume); if (video.muted && video.volume > 0) setMute(false); });
-video.volume = store.get('vol', 1); $('vol').value = video.volume;
+function setVolume(v, badge) {
+  v = Math.round(clamp(v, 0, 1) * 100) / 100;
+  video.volume = v; $('vol').value = v; store.set('vol', v);
+  if (video.muted && v > 0) setMute(false);
+  $('vol').title = `Âm lượng ${Math.round(v * 100)}% (+ / −, lăn chuột)`;
+  if (badge) showBadge(`Âm lượng ${Math.round(v * 100)}%`);
+}
+$('vol').addEventListener('input', e => setVolume(+e.target.value));
+// lăn chuột trên nút loa / thanh âm lượng để chỉnh
+[$('vol'), $('btnMute')].forEach(el => el.addEventListener('wheel', e => { e.preventDefault(); setVolume(video.volume + (e.deltaY < 0 ? 0.05 : -0.05), true); }, { passive: false }));
+setVolume(store.get('vol', 1));
 setLoop(store.get('loop', true)); setMute(store.get('muted', false));
 
 async function toggleFullscreen() { await api.toggleFullscreen(); }
@@ -462,6 +479,7 @@ const RUN = {
   home: () => { pause(); seekFrame(0); }, end: () => { pause(); seekFrame(S.frames - 1); },
   slower: () => cycleSpeed(-1), faster: () => { cycleSpeed(1); if (video.paused) play(); }, pause: () => pause(),
   loop: () => setLoop(!S.loop), markIn, markOut, clearRange, mute: () => setMute(!video.muted),
+  volUp: () => setVolume((video.muted ? 0 : video.volume) + 0.1, true), volDown: () => setVolume(video.volume - 0.1, true),
   fullscreen: toggleFullscreen, fit: () => S.ready && fit(), fitWindow, actual: () => S.ready && zoomTo(1),
   open: () => openDialog(false), newWindow: () => S.file ? api.newWindow(S.file) : openDialog(true)
 };
@@ -497,7 +515,9 @@ document.addEventListener('keydown', e => {
   if (e.target.matches('input[type=text],textarea')) return;
   if (['Control', 'Shift', 'Alt', 'Meta'].includes(e.key)) return;
   const combo = comboOf(e);
-  const act = Object.keys(keymap).find(a => (keymap[a] || []).includes(combo));
+  let act = Object.keys(keymap).find(a => (keymap[a] || []).includes(combo));
+  // phím "+" trên bàn phím thường = Shift + "=": vẫn tính là tăng âm lượng
+  if (!act && e.shiftKey && ['Equal', 'Minus'].includes(e.code)) act = Object.keys(keymap).find(a => (keymap[a] || []).includes(e.code) && /^vol/.test(a));
   if (act) { e.preventDefault(); RUN[act](); }
   else if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
 });

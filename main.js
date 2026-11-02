@@ -39,7 +39,7 @@ function createWindow(file, offset = 0) {
   const win = new BrowserWindow({
     width: b.width || 1180, height: b.height || 760,
     x: b.x != null ? b.x + offset : undefined, y: b.y != null ? b.y + offset : undefined,
-    minWidth: 640, minHeight: 420,
+    minWidth: 860, minHeight: 480,
     title: 'M PlayO', backgroundColor: '#1F2126',
     titleBarStyle: 'hidden',
     titleBarOverlay: { color: '#1F2126', symbolColor: '#FFFFFF', height: 58 },
