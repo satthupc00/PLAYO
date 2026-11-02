@@ -1,15 +1,11 @@
 {
-  "version": "1.4.0",
+  "version": "1.4.1",
   "date": "2026-11-02",
   "new": [
-    "Chỉnh âm lượng to / nhỏ: kéo thanh âm lượng, lăn chuột trên nút loa, hoặc phím + / − (mỗi lần 10%)"
+    "Ctrl + click chuột phải lên video cũng co cửa sổ vừa khít video"
   ],
-  "improved": [
-    "Thanh trên cùng chỉ hiện tên file cho dễ đọc (rê chuột lên tên file để xem kích thước, fps, codec)",
-    "Nút Lặp thành icon gọn, hiện nhãn A-B khi đang lặp đoạn đánh dấu",
-    "2 nút đánh dấu đầu / cuối đoạn và âm lượng luôn hiện; cửa sổ không kéo nhỏ quá mức để không mất nút",
-    "Bỏ nút toàn màn hình ở thanh dưới (dùng double-click hoặc phím F)",
-    "Co cửa sổ vừa khít video: video luôn nằm giữa khung"
-  ],
-  "fixed": []
+  "improved": [],
+  "fixed": [
+    "Co cửa sổ vừa khít video khi đang zoom to: video bị lệch, giờ luôn nằm giữa"
+  ]
 }

@@ -26,7 +26,7 @@ const ACTIONS = [
   ['volDown', 'Giảm âm lượng', ['Minus', 'NumpadSubtract']],
   ['fullscreen', 'Toàn màn hình', ['KeyF']],
   ['fit', 'Zoom vừa khung', ['Digit0']],
-  ['fitWindow', 'Co cửa sổ vừa khít video (giữ chuột trái + click phải)', []],
+  ['fitWindow', 'Co cửa sổ vừa khít video (giữ chuột trái hoặc Ctrl + click phải)', []],
   ['actual', 'Zoom 100% (kích thước gốc)', ['Digit1']],
   ['open', 'Mở video', ['Ctrl+KeyO']],
   ['newWindow', 'Mở video này trong cửa sổ mới', ['Ctrl+KeyN']]
@@ -404,7 +404,7 @@ stage.addEventListener('pointerdown', e => {
   pan = { x: e.clientX, y: e.clientY, ox: S.z.x, oy: S.z.y, moved: false };
 });
 stage.addEventListener('pointermove', e => {
-  if (!pan) return;
+  if (!pan || pan.cancel) return;   // sau khi co cửa sổ: bỏ kéo (cửa sổ dời chỗ làm con trỏ 'di chuyển' giả)
   const dx = e.clientX - pan.x, dy = e.clientY - pan.y;
   if (!pan.moved && Math.hypot(dx, dy) < 4) return;
   pan.moved = true;
@@ -497,7 +497,7 @@ function refreshTitles() {
     `<span>Lăn chuột</span><span>Zoom tại con chuột · kéo chuột để di chuyển</span>` +
     `<span>Click / double-click</span><span>Phát–dừng / toàn màn hình</span>`;
   const p = (keymap.prevFrame || [])[0], n = (keymap.nextFrame || [])[0];
-  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · ${comboLabel((keymap.markIn || ['I'])[0])}/${comboLabel((keymap.markOut || ['O'])[0])}: đánh dấu đoạn lặp · Lăn chuột: zoom · Kéo: di chuyển · Click: phát/dừng · Double-click: toàn màn hình · Giữ trái + click phải: cửa sổ vừa video`;
+  $('hint').textContent = `${p ? comboLabel(p) : ''} ${n ? comboLabel(n) : ''} từng frame · Shift: 10 frame · ${comboLabel((keymap.markIn || ['I'])[0])}/${comboLabel((keymap.markOut || ['O'])[0])}: đánh dấu đoạn lặp · Lăn chuột: zoom · Kéo: di chuyển · Click: phát/dừng · Double-click: toàn màn hình · Giữ trái / Ctrl + click phải: cửa sổ vừa video`;
 }
 
 /* ================= Bàn phím ================= */
@@ -562,7 +562,7 @@ function hideMenu() { $('menu').hidden = true; }
 stage.addEventListener('contextmenu', e => {
   e.preventDefault();
   if (skipMenu) { skipMenu = false; return; }
-  if (e.buttons & 1) return chordFit();
+  if ((e.buttons & 1) || e.ctrlKey) return chordFit();   // giữ chuột trái hoặc Ctrl + click phải
   showMenu(e.clientX, e.clientY);
 });
 document.addEventListener('pointerdown', e => { if (!e.target.closest('.menu')) hideMenu(); }, true);
