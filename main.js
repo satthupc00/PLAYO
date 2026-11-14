@@ -378,6 +378,8 @@ async function autoRegisterAssoc() {
     const st = await assocStatus();
     await registerAssoc(st.list.filter(x => !x.locked).map(x => x.ext));
     settings.assocMark = mark; saveSettings();
+    // làm mới bộ nhớ icon của Windows để Explorer hiện icon mới
+    require('child_process').execFile('ie4uinit.exe', ['-show'], { windowsHide: true }, () => {});
   } catch {}
 }
 ipcMain.handle('assoc-status', () => assocStatus());
