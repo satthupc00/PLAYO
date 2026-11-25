@@ -74,7 +74,7 @@ button:disabled{opacity:.4;cursor:default}
 .stage{flex:1;min-height:0;background:var(--stage);position:relative;overflow:hidden;cursor:default}
 .stage.has-video{cursor:grab}
 .stage.panning{cursor:grabbing}
-#video{position:absolute;left:0;top:0;transform-origin:0 0;display:none;background:#000;box-shadow:0 8px 30px rgba(0,0,0,.4)}
+#video{position:absolute;left:0;top:0;transform-origin:50% 50%;display:none;background:#000;box-shadow:0 8px 30px rgba(0,0,0,.4)}
 .has-video #video{display:block}
 #video.pixel{image-rendering:pixelated}
 .osd{position:absolute;top:12px;left:12px;background:rgba(0,0,0,.55);border-radius:6px;padding:3px 9px;font-weight:700;

@@ -156,7 +156,8 @@ function canPlayNative(file, info) {
 const cacheDir = () => path.join(app.getPath('temp'), 'mplayo-cache');
 function cacheKey(file) {
   const st = fs.statSync(file);
-  return require('crypto').createHash('sha1').update(file + '|' + st.size + '|' + st.mtimeMs).digest('hex').slice(0, 20);
+  // 'v2': đổi cách chuyển đổi (giữ màu 4:4:4) -> bỏ qua file tạm cũ
+  return require('crypto').createHash('sha1').update('v2|' + file + '|' + st.size + '|' + st.mtimeMs).digest('hex').slice(0, 20);
 }
 function cleanCache(all = false) {
   const dir = cacheDir();
@@ -179,17 +180,36 @@ function cancelJob(id) {
   if (p) { try { p.kill(); } catch {} jobs.delete(id); }
 }
 
-function transcode(sender, file, info) {
-  const { spawn } = require('child_process');
-  const out = path.join(cacheDir(), cacheKey(file) + '.mp4');
-  if (fs.existsSync(out)) { fs.utimesSync(out, new Date(), new Date()); return Promise.resolve(out); }
-  fs.mkdirSync(cacheDir(), { recursive: true });
-  const part = out + '.part.mp4';
-  cancelJob(sender.id);
-  const args = ['-hide_banner', '-nostats', '-y', '-i', file, '-map', '0:v:0', '-map', '0:a:0?',
-    '-c:v', 'libx264', '-preset', 'ultrafast', '-tune', 'fastdecode', '-crf', '17', '-g', '6',
+// Video có màu đầy đủ (4:4:4 / 4:2:2 / RGB, vd quay màn hình, ProRes 4444) -> VP9 4:4:4 để chữ nhỏ vẫn nét.
+// Video thường (4:2:0) -> H.264 như cũ.
+const fullChroma = info => !!(info && /444|422|440|gbr|rgb|argb|bgr|abgr|rgba|bgra/.test(info.pixfmt || ''));
+function transcodeArgs(file, part, vp9) {
+  const head = ['-hide_banner', '-nostats', '-y', '-i', file, '-map', '0:v:0', '-map', '0:a:0?'];
+  const tail = ['-progress', 'pipe:1', part];
+  if (vp9) return [...head, '-c:v', 'libvpx-vp9', '-deadline', 'realtime', '-cpu-used', '8', '-row-mt', '1',
+    '-crf', '16', '-b:v', '0', '-g', '6', '-pix_fmt', 'yuv444p', '-c:a', 'libopus', '-b:a', '160k', ...tail];
+  return [...head, '-c:v', 'libx264', '-preset', 'veryfast', '-tune', 'fastdecode', '-crf', '14', '-g', '6',
     '-pix_fmt', 'yuv420p', '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2',
-    '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-progress', 'pipe:1', part];
+    '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', ...tail];
+}
+async function transcode(sender, file, info) {
+  const key = cacheKey(file);
+  for (const ext of ['.webm', '.mp4']) {
+    const done = path.join(cacheDir(), key + ext);
+    if (fs.existsSync(done)) { fs.utimesSync(done, new Date(), new Date()); return done; }
+  }
+  fs.mkdirSync(cacheDir(), { recursive: true });
+  if (fullChroma(info)) {
+    try { return await runFfmpeg(sender, info, path.join(cacheDir(), key + '.webm'), true, file); }
+    catch (e) { if (e.message === 'cancelled') throw e; } // máy không mã hoá được VP9 -> dùng H.264
+  }
+  return runFfmpeg(sender, info, path.join(cacheDir(), key + '.mp4'), false, file);
+}
+function runFfmpeg(sender, info, out, vp9, file) {
+  const { spawn } = require('child_process');
+  const part = out + '.part' + path.extname(out);
+  cancelJob(sender.id);
+  const args = transcodeArgs(file, part, vp9);
   return new Promise((resolve, reject) => {
     const p = spawn(bins().FFMPEG, args, { windowsHide: true });
     jobs.set(sender.id, p);

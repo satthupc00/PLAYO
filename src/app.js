@@ -345,22 +345,40 @@ function vSize() { const [w, h] = nSize(); return S.rot % 180 ? [h, w] : [w, h];
 function layout() {
   const [vw, vh] = vSize();
   const W = stage.clientWidth, H = stage.clientHeight;
-  const [nw, nh] = nSize();
-  video.style.width = nw + 'px'; video.style.height = nh + 'px';
   if (S.z.fit) {
-    const s = Math.min(W / vw, H / vh);
+    const s = crispScale(Math.min(W / vw, H / vh), true);
     S.z = { s, x: (W - vw * s) / 2, y: (H - vh * s) / 2, fit: true };
   }
   applyZoom();
 }
+/* Hiển thị nét: tính theo điểm ảnh thật của màn hình (Windows scale 125% / 150%…).
+   Tỉ lệ gần 100% / 200% / 300%… thì bắt đúng số nguyên để mỗi điểm ảnh video = đúng N điểm ảnh màn hình,
+   và vị trí luôn khớp lưới điểm ảnh (không lệch nửa điểm làm nhòe chữ). */
+const dpr = () => window.devicePixelRatio || 1;
+function crispScale(s, forFit) {
+  const d = s * dpr();
+  if (d >= 1) {
+    const n = Math.floor(d);
+    if (forFit ? d - n < 0.25 * n : Math.abs(d - Math.round(d)) < 0.04 * Math.round(d)) return (forFit ? n : Math.round(d)) / dpr();
+  }
+  return s;
+}
 function applyZoom() {
   const [nw, nh] = nSize(), [ew, eh] = vSize();
-  // xoay quanh tâm video, rồi đặt khung đã xoay vào vị trí (x, y) với tỉ lệ s
-  video.style.transform = `translate(${S.z.x}px,${S.z.y}px) scale(${S.z.s}) translate(${ew / 2}px,${eh / 2}px) rotate(${S.rot}deg) translate(${-nw / 2}px,${-nh / 2}px)`;
-  video.classList.toggle('pixel', S.z.s >= 3);
+  const r = dpr(), st = stage.getBoundingClientRect(), s = S.z.s;
+  // làm tròn vị trí theo lưới điểm ảnh màn hình (tính cả vị trí của khung video trong cửa sổ)
+  const x = Math.round((st.left + S.z.x) * r) / r - st.left, y = Math.round((st.top + S.z.y) * r) / r - st.top;
+  // Đặt video bằng left/top/width/height (không dùng transform để phóng): trình duyệt vẽ thẳng từng điểm ảnh,
+  // không lấy mẫu lại thêm lần nữa -> chữ nhỏ nét như bản gốc. Chỉ dùng transform khi xoay.
+  const w = nw * s, h = nh * s;
+  video.style.width = w + 'px'; video.style.height = h + 'px';
+  video.style.left = (x + (ew * s - w) / 2) + 'px'; video.style.top = (y + (eh * s - h) / 2) + 'px';
+  video.style.transform = S.rot ? `rotate(${S.rot}deg)` : 'none';
+  // phóng to từ 200% trở lên: giữ điểm ảnh vuông sắc nét (soi chi tiết)
+  video.classList.toggle('pixel', s * r >= 2 - 1e-6);
 }
 let badgeTimer = 0;
-function showZoomBadge() { showBadge(Math.round(S.z.s * 100) + '%'); }
+function showZoomBadge() { showBadge(Math.round(S.z.s * dpr() * 100) + '%'); }
 function showBadge(text) {
   const b = $('zoomBadge');
   b.hidden = false; b.classList.remove('fade');
@@ -369,7 +387,7 @@ function showBadge(text) {
   badgeTimer = setTimeout(() => b.classList.add('fade'), 900);
 }
 function zoomAt(factor, cx, cy) {
-  const ns = clamp(S.z.s * factor, 0.05, 40);
+  const ns = crispScale(clamp(S.z.s * factor, 0.05, 40), false);
   const k = ns / S.z.s;
   S.z = { s: ns, x: cx - (cx - S.z.x) * k, y: cy - (cy - S.z.y) * k, fit: false };
   applyZoom(); showZoomBadge();
@@ -497,7 +515,7 @@ const RUN = {
   loop: () => setLoop(!S.loop), markIn, markOut, clearRange, mute: () => setMute(!video.muted),
   volUp: () => setVolume((video.muted ? 0 : video.volume) + 0.1, true), volDown: () => setVolume(video.volume - 0.1, true),
   fullscreen: toggleFullscreen, fit: () => S.ready && fit(), fitWindow,
-  rotLeft: () => rotate(-90), rotRight: () => rotate(90), actual: () => S.ready && zoomTo(1),
+  rotLeft: () => rotate(-90), rotRight: () => rotate(90), actual: () => S.ready && zoomTo(1 / dpr()),
   open: () => openDialog(false), newWindow: () => S.file ? api.newWindow(S.file) : openDialog(true)
 };
 document.querySelectorAll('[data-act]').forEach(b => b.addEventListener('click', () => RUN[b.dataset.act]()));
