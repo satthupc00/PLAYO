@@ -541,7 +541,7 @@ document.addEventListener('keydown', e => {
   if (listening) return captureKey(e);
   if (e.key === 'Escape') {
     if (!$('menu').hidden) return hideMenu();
-    const open = [...document.querySelectorAll('.modal-bg')].find(m => !m.hidden);
+    const open = [...document.querySelectorAll('.modal-bg')].reverse().find(m => !m.hidden);  // đóng hộp mở sau cùng trước
     if (open) return closeModal(open);
     if (document.body.classList.contains('fs')) return api.exitFullscreen();
     return;
@@ -628,7 +628,8 @@ document.querySelectorAll('.modal-bg').forEach(m => {
   m.addEventListener('pointerdown', e => { if (e.target === m) closeModal(m); });
   m.querySelector('[data-close]').addEventListener('click', () => closeModal(m));
 });
-$('btnSettings').addEventListener('click', () => { renderKeymap(); refreshAssoc(); openModal('settingsModal'); });
+$('btnSettings').addEventListener('click', () => { refreshAssoc(); openModal('settingsModal'); });
+$('btnKeys').addEventListener('click', () => { renderKeymap(); openModal('keysModal'); });
 
 /* ================= App mặc định ================= */
 async function refreshAssoc() {
@@ -659,8 +660,11 @@ window.addEventListener('focus', () => { if (!$('settingsModal').hidden || !$('b
 function renderKeymap() {
   const box = $('keymap');
   box.innerHTML = '';
-  for (const [act, label] of ACTIONS) {
-    const l = document.createElement('div'); l.className = 'lbl'; l.textContent = label; box.appendChild(l);
+  // 2 cột: đọc hết cột trái rồi sang cột phải
+  const half = Math.ceil(ACTIONS.length / 2), order = [];
+  for (let i = 0; i < half; i++) { order.push(ACTIONS[i]); if (ACTIONS[half + i]) order.push(ACTIONS[half + i]); }
+  for (const [act, label] of order) {
+    const l = document.createElement('div'); l.className = 'lbl'; l.textContent = label; l.title = label; box.appendChild(l);
     for (let i = 0; i < 2; i++) {
       const k = (keymap[act] || [])[i];
       const b = document.createElement('button');

@@ -1,12 +1,9 @@
 {
-  "version": "1.5.2",
-  "date": "2026-11-25",
+  "version": "1.5.3",
+  "date": "2026-11-28",
   "new": [],
   "improved": [
-    "Video quay màn hình / chữ nhỏ (H.264 4:4:4, ProRes 4444…) giờ hiển thị nét như bản gốc: giữ đủ màu khi chuyển đổi, không còn bị nhòe chữ",
-    "Hiển thị nét đúng từng điểm ảnh: tự bắt về 100% / 200%… khi gần đúng tỉ lệ, kể cả khi Windows đặt Scale 125% / 150%"
+    "Cài đặt gọn hơn: danh sách phím tắt gom vào nút “Phím tắt”, mở ra bảng riêng"
   ],
-  "fixed": [
-    "Video 4:4:4 mở bằng M PlayO bị mờ hơn hẳn so với MPC-HC"
-  ]
+  "fixed": []
 }

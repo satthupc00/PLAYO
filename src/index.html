@@ -98,9 +98,9 @@
   <div class="modal" role="dialog" aria-label="Cài đặt">
     <div class="modal-h"><h2>Cài đặt</h2><button type="button" class="ibtn ghost" data-close title="Đóng (Esc)" aria-label="Đóng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
     <div class="modal-b">
-      <h3>Phím tắt <span class="muted">— bấm vào ô rồi nhấn phím mới, Delete để xoá</span></h3>
-      <div class="keymap" id="keymap"></div>
-      <div class="row-btns"><button type="button" id="btnResetKeys">Khôi phục mặc định</button></div>
+      <h3>Phím tắt</h3>
+      <div class="set-row"><span class="muted">Xem và đổi phím tắt cho các thao tác (xem từng frame, đánh dấu đoạn, zoom, xoay…).</span>
+        <button type="button" id="btnKeys"><svg viewBox="0 0 24 24"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M7 14h10"/></svg>Phím tắt</button></div>
       <h3>Ứng dụng mặc định</h3>
       <div class="set-row"><span class="muted" id="assocText">Mở mọi file MP4, MOV, AVI, MKV, WebM… bằng M PlayO khi double-click.</span><button type="button" class="primary" id="btnDefault">Đặt làm app mặc định</button></div>
       <div class="assoc" id="assocList"></div>
@@ -114,6 +114,17 @@
           <button type="button" id="btnCheck2">Kiểm tra cập nhật</button>
         </span>
       </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="keysModal" hidden>
+  <div class="modal keys-modal" role="dialog" aria-label="Phím tắt">
+    <div class="modal-h"><h2>Phím tắt</h2><button type="button" class="ibtn ghost" data-close title="Đóng (Esc)" aria-label="Đóng"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+    <div class="modal-b">
+      <p class="muted" style="margin:10px 0 8px">Bấm vào ô rồi nhấn phím mới · Delete để xoá · Esc để huỷ</p>
+      <div class="keymap" id="keymap"></div>
+      <div class="row-btns"><button type="button" id="btnResetKeys">Khôi phục mặc định</button></div>
     </div>
   </div>
 </div>

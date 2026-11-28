@@ -196,6 +196,13 @@ input[type=range]:active::-webkit-slider-thumb{transform:scale(1.4);box-shadow:0
 .linkbtn{background:none;border:0;color:var(--muted);text-decoration:underline;text-underline-offset:3px;height:auto;padding:2px 4px;justify-self:center}
 .linkbtn:hover:not(:disabled){color:var(--text);transform:none}
 
+/* bảng phím tắt: 2 cột cho gọn */
+.keys-modal{width:900px}
+.keys-modal .keymap{grid-template-columns:minmax(0,1fr) auto auto minmax(0,1fr) auto auto;gap:4px 8px}
+.keys-modal .keymap .lbl:nth-child(6n+4){padding-left:18px;border-left:1px solid var(--line)}
+.keys-modal .kslot{min-width:76px;height:26px;padding:0 8px}
+.keys-modal .lbl{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
 /* toast */
 .toast{position:fixed;left:50%;bottom:118px;transform:translateX(-50%);z-index:70;background:var(--panel);border:1px solid var(--line);
   border-left:3px solid var(--red);border-radius:6px;padding:8px 14px;box-shadow:0 10px 26px rgba(0,0,0,.45);animation:rise .25s var(--ease-out);
